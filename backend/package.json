@@ -1,0 +1,14 @@
+{
+  "name": "chat-spider",
+  "version": "1.0.0",
+  "description": "backend for the chat-spider app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Arjun Sabu",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
