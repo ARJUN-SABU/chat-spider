@@ -16,7 +16,12 @@ function ChatPage() {
 
   //states
   const [userChatList, setUserChatList] = useState([]);
+  const [uniqueContacts, setUniqueContacts] = useState([]);
   const [currentChatWindow, setCurrentChatWindow] = useState(null);
+  const [currentUser, setCurrentUser] = useState({
+    email: "",
+    name: "",
+  });
 
   useEffect(() => {
     //TODO:
@@ -26,12 +31,48 @@ function ChatPage() {
       .then((data) => data.json())
       .then((userDoc) => {
         console.log(userDoc);
+        setCurrentUser({
+          email: userDoc.userEmail,
+          name: userDoc.userName,
+        });
         setUserChatList(userDoc.userChats);
+        setUniqueContacts(
+          getUniqueContacts(userDoc.userChats, userDoc.userEmail)
+        );
       })
       .catch((err) => console.log(err));
   }, []);
 
   //utitlity functions
+
+  function getUniqueContacts(userChats, currentEmail) {
+    let uniqueEmails = new Set();
+    let uniqueContacts = [];
+
+    userChats.forEach((userChat) => {
+      if (userChat.type === "singleChat") {
+        if (!uniqueEmails.has(userChat.participantEmail)) {
+          uniqueEmails.add(userChat.participantEmail);
+          uniqueContacts.push({
+            name: userChat.participantName,
+            email: userChat.participantEmail,
+          });
+        }
+      } else {
+        userChat.participants.forEach((participant) => {
+          if (
+            !uniqueEmails.has(participant.email) &&
+            participant.email !== currentEmail
+          ) {
+            uniqueEmails.add(participant.email);
+            uniqueContacts.push(participant);
+          }
+        });
+      }
+    });
+    console.log(uniqueContacts);
+    return uniqueContacts;
+  }
 
   //to handle the actions when one of the chat window is opened
   //by selecting a user's chat from the left.
@@ -61,6 +102,33 @@ function ChatPage() {
     event.target.style.height = event.target.scrollHeight + "px";
   }
 
+  function toggleUserSelectionForGroup(targetUser) {
+    document.querySelector(`.${targetUser}`).classList.toggle("selected");
+  }
+
+  function createNewGroup() {
+    let newGroupMembers = [];
+    document
+      .querySelectorAll(".chatPage__leftSection__bottom__groupSelectionUser")
+      .forEach((userBlock) => {
+        if (userBlock.classList.contains("selected")) {
+          // console.log(userBlock);
+
+          newGroupMembers.push({
+            name: userBlock.querySelector(
+              ".chatPage__leftSection__bottom__groupSelectionUser__name"
+            ).innerText,
+            email: userBlock.querySelector(
+              ".chatPage__leftSection__bottom__groupSelectionUser__email"
+            ).innerText,
+          });
+        }
+      });
+
+    newGroupMembers.push(currentUser);
+    console.log(newGroupMembers);
+  }
+
   return (
     <div className="chatPage">
       <div className="chatPage__leftSection">
@@ -68,11 +136,13 @@ function ChatPage() {
           <div>
             {/* User Avatar */}
             {/* User Name */}
+            <h4>UserName</h4>
           </div>
           <div>
             {/* options symbol to create
             group chat and individual chats */}
             {/* Option for logout */}
+            <button>More Options</button>
           </div>
         </div>
 
@@ -94,6 +164,47 @@ function ChatPage() {
               />
             )
           )}
+        </div>
+
+        <div className="chatPage__leftSection__bottom">
+          <p>Start a new conversation</p>
+          <p>Join a group</p>
+          <p>Create a new group</p>
+          <p>Logout</p>
+        </div>
+        <div className="chatPage__leftSection__bottom">
+          <p>Start a new conversation</p>
+          <input placeholder="Enter name" type="text" />
+          <input placeholder="Enter email" type="email" />
+          <textarea placeholder="Say Hi!" />
+          <button>Send</button>
+        </div>
+        <div className="chatPage__leftSection__bottom">
+          <p>Join a group</p>
+          <input type="text" placeholder="Enter the group id" />
+        </div>
+        <div className="chatPage__leftSection__bottom">
+          <p>Create a new group</p>
+          <input placeholder="Enter group name" />
+          <p>Select the group participants</p>
+          <div>
+            {uniqueContacts.map((contact, index) => (
+              <div
+                className={`chatPage__leftSection__bottom__groupSelectionUser groupUser-${index}`}
+                onClick={() =>
+                  toggleUserSelectionForGroup(`groupUser-${index}`)
+                }
+              >
+                <p className="chatPage__leftSection__bottom__groupSelectionUser__name">
+                  {contact.name}
+                </p>
+                <p className="chatPage__leftSection__bottom__groupSelectionUser__email">
+                  {contact.email}
+                </p>
+              </div>
+            ))}
+          </div>
+          <button onClick={createNewGroup}>Create a new group</button>
         </div>
       </div>
       <div className="chatPage__rightSection">

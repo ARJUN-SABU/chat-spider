@@ -23,6 +23,9 @@
 .chatPage__leftSection__top {
   height: 30px;
   background-color: yellow;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .chatPage__leftSection__bottom {
@@ -74,7 +77,15 @@
   justify-content: center;
   cursor: pointer;
 }
+.chatPage__leftSection__bottom__groupSelectionUser {
+  cursor: pointer;
+  border: 1px solid black;
+}
 
 .hide {
   display: none;
+}
+
+.selected {
+  background-color: aqua;
 }
