@@ -5,6 +5,9 @@ import { useParams } from "react-router-dom";
 //components
 import ChatPreview from "./ChatPreview";
 
+//icons
+import { IoSend } from "react-icons/io5";
+
 //styles
 import "../styles/ChatPage.css";
 
@@ -29,6 +32,9 @@ function ChatPage() {
   }, []);
 
   //utitlity functions
+
+  //to handle the actions when one of the chat window is opened
+  //by selecting a user's chat from the left.
   function handleChatPreviewClick(chatRoomID) {
     if (!currentChatWindow) {
       document.querySelector("#noWindowSelectedScreen").classList.add("hide");
@@ -41,6 +47,18 @@ function ChatPage() {
       .querySelector(`#chatWindow-${chatRoomID}`)
       .classList.remove("hide");
     setCurrentChatWindow(chatRoomID);
+  }
+
+  function autoGrowInputArea(event) {
+    console.log(event.target);
+
+    //When a lot of lines are typed and suddenly everything is selected
+    //and deleted then the scroll height still remains that many number of lines.
+    //So, first we reduce the height to 20px and then if the text's height > textarea's height
+    //then scrolling would happen. So the next line then sets the scroll height
+    //as the text area height.
+    event.target.style.height = "20px";
+    event.target.style.height = event.target.scrollHeight + "px";
   }
 
   return (
@@ -87,6 +105,7 @@ function ChatPage() {
           <div>
             {/* options/menu symbol
              for viewing the group members if it is a group chat*/}
+            {/* Option to close the chat */}
           </div>
         </div>
         <div className="chatPage__rightSection__middle">
@@ -107,7 +126,17 @@ function ChatPage() {
             </div>
           ))}
         </div>
-        <div className="chatPage__rightSection__bottom"></div>
+        <div className="chatPage__rightSection__bottom">
+          {/* <div>Adding smiley selector later</div> */}
+          <textarea
+            className="chatPage__rightSection__bottom__inputArea"
+            onChange={autoGrowInputArea}
+          />
+
+          <button className="chatPage__rightSection__bottom__sendMessage">
+            <IoSend />
+          </button>
+        </div>
       </div>
     </div>
   );
