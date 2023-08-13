@@ -39,7 +39,7 @@ app.use(cors(corsOptions));
 app.get("/user-chats-and-groups/:userId", (req, res) => {
   db.collection("chat-spider-users")
     .findOne({
-      userId: req.params.userId,
+      userEmail: req.params.userId,
     })
     .then((doc) => {
       res.status(200).json(doc);

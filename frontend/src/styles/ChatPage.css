@@ -1,0 +1,59 @@
+.chatPage {
+  height: 100vh;
+  width: 100vw;
+  background-color: red;
+  display: flex;
+}
+
+.chatPage__leftSection {
+  width: 260px;
+  height: 100vh;
+  background-color: blue;
+  border-right: 3px solid black;
+  display: flex;
+  flex-direction: column;
+}
+.chatPage__rightSection {
+  flex: 1;
+  height: 100vh;
+  background-color: green;
+  display: flex;
+  flex-direction: column;
+}
+.chatPage__leftSection__top {
+  height: 35px;
+  background-color: yellow;
+}
+
+.chatPage__leftSection__bottom {
+  flex: 1;
+  overflow-y: scroll;
+  background-color: orange;
+}
+
+.chatPage__rightSection__top {
+  height: 35px;
+  background-color: yellow;
+}
+.chatPage__rightSection__middle {
+  flex: 1;
+  background-color: antiquewhite;
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+}
+
+.chatPage__rightSection__bottom {
+  height: 35px;
+  background-color: yellow;
+}
+
+.chatPage__rightSection__middle__liveChatWindow {
+  overflow-y: scroll;
+  flex: 1;
+  background-color: brown;
+}
+
+.hide {
+  display: none;
+}
