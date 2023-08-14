@@ -15,6 +15,30 @@ function HomePage() {
       >
         Login
       </button>
+
+      <br />
+      <br />
+      <br />
+
+      <input type="text" placeholder="User Name" id="newUserName" />
+      <input type="email" placeholder="User Email" id="newUserEmail" />
+      <button
+        onClick={() => {
+          fetch("http://localhost:8000/create-new-user", {
+            method: "post",
+            body: JSON.stringify({
+              userName: document.querySelector("#newUserName").value,
+              userEmail: document.querySelector("#newUserEmail").value,
+              userChats: [],
+            }),
+            headers: {
+              "Content-type": "application/json",
+            },
+          });
+        }}
+      >
+        Create New User
+      </button>
     </div>
   );
 }
