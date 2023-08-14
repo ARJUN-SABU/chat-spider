@@ -6,7 +6,7 @@ import { useParams } from "react-router-dom";
 import ChatPreview from "./ChatPreview";
 
 //icons
-import { IoSend } from "react-icons/io5";
+import { IoSend, IoCloseCircle } from "react-icons/io5";
 
 //styles
 import "../styles/ChatPage.css";
@@ -22,6 +22,9 @@ function ChatPage() {
     email: "",
     name: "",
   });
+  const [currentLeftPanel, setCurrentLeftPanel] = useState(
+    "chatPage__leftSection__bottom--chatsPanel"
+  );
 
   useEffect(() => {
     //TODO:
@@ -129,24 +132,40 @@ function ChatPage() {
     console.log(newGroupMembers);
   }
 
+  function handleLeftPanel(panelToOpen) {
+    document.querySelector(`.${currentLeftPanel}`).classList.add("hide");
+    document.querySelector(`.${panelToOpen}`).classList.remove("hide");
+    setCurrentLeftPanel(panelToOpen);
+  }
+
   return (
     <div className="chatPage">
       <div className="chatPage__leftSection">
         <div className="chatPage__leftSection__top">
           <div>
             {/* User Avatar */}
-            {/* User Name */}
             <h4>UserName</h4>
+            {/* User Email */}
           </div>
           <div>
-            {/* options symbol to create
-            group chat and individual chats */}
-            {/* Option for logout */}
-            <button>More Options</button>
+            <button
+              onClick={() =>
+                handleLeftPanel("chatPage__leftSection__bottom--MenuPanel")
+              }
+            >
+              More Options
+            </button>
+            <button
+              onClick={() =>
+                handleLeftPanel("chatPage__leftSection__bottom--chatsPanel")
+              }
+            >
+              <IoCloseCircle />
+            </button>
           </div>
         </div>
 
-        <div className="chatPage__leftSection__bottom">
+        <div className="chatPage__leftSection__bottom chatPage__leftSection__bottom--chatsPanel">
           {userChatList.map((userChat) =>
             userChat.type === "singleChat" ? (
               <ChatPreview
@@ -166,24 +185,48 @@ function ChatPage() {
           )}
         </div>
 
-        <div className="chatPage__leftSection__bottom">
-          <p>Start a new conversation</p>
-          <p>Join a group</p>
-          <p>Create a new group</p>
+        <div className="chatPage__leftSection__bottom chatPage__leftSection__bottom--MenuPanel hide">
+          <p
+            onClick={() =>
+              handleLeftPanel(
+                "chatPage__leftSection__bottom--newSingleChatPanel"
+              )
+            }
+          >
+            Start a new conversation
+          </p>
+          <p
+            onClick={() =>
+              handleLeftPanel(
+                "chatPage__leftSection__bottom--joinNewGroupPanel"
+              )
+            }
+          >
+            Join a group
+          </p>
+          <p
+            onClick={() => {
+              handleLeftPanel(
+                "chatPage__leftSection__bottom--createNewGroupPanel"
+              );
+            }}
+          >
+            Create a new group
+          </p>
           <p>Logout</p>
         </div>
-        <div className="chatPage__leftSection__bottom">
+        <div className="chatPage__leftSection__bottom chatPage__leftSection__bottom--newSingleChatPanel hide">
           <p>Start a new conversation</p>
           <input placeholder="Enter name" type="text" />
           <input placeholder="Enter email" type="email" />
           <textarea placeholder="Say Hi!" />
           <button>Send</button>
         </div>
-        <div className="chatPage__leftSection__bottom">
+        <div className="chatPage__leftSection__bottom chatPage__leftSection__bottom--joinNewGroupPanel hide">
           <p>Join a group</p>
           <input type="text" placeholder="Enter the group id" />
         </div>
-        <div className="chatPage__leftSection__bottom">
+        <div className="chatPage__leftSection__bottom chatPage__leftSection__bottom--createNewGroupPanel hide">
           <p>Create a new group</p>
           <input placeholder="Enter group name" />
           <p>Select the group participants</p>
@@ -216,6 +259,7 @@ function ChatPage() {
           <div>
             {/* options/menu symbol
              for viewing the group members if it is a group chat*/}
+            {/* as well as option to show and copy the group id. */}
             {/* Option to close the chat */}
           </div>
         </div>
