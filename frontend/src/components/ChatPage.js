@@ -63,22 +63,22 @@ function ChatPage() {
   // ------------------------------- socket events -------------------------------
   socket.on("new-singleChat-start-message", (message) => {
     console.log("This is the new message -> ", message);
-    setUserChatList([
+    setUserChatList((previous) => [
       {
         type: "singleChat",
         participantName: message.senderName,
         participantEmail: message.senderEmail,
         roomID: message.roomID,
       },
-      ...userChatList,
+      ...previous,
     ]);
 
-    setUniqueContacts([
+    setUniqueContacts((previous) => [
       {
         name: message.senderName,
         email: message.senderEmail,
       },
-      ...uniqueContacts,
+      ...previous,
     ]);
 
     // setTimeout(() => {
@@ -87,15 +87,16 @@ function ChatPage() {
   });
 
   socket.on("new-group-creation-notification", (message) => {
-    console.log(message);
-    console.log(userChatList);
-    setUserChatList([
+    // console.log(message);
+    // console.log(userChatList);
+
+    setUserChatList((previous) => [
       {
         type: "groupChat",
         groupName: message.groupName,
         roomID: message.roomID,
       },
-      ...userChatList,
+      ...previous,
     ]);
   });
 

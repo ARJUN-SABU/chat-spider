@@ -109,76 +109,76 @@ app.post("/create-new-chat", (req, res) => {
         });
       }
 
-      db.collection("chat-spider-users")
-        .updateOne(
-          {
-            userEmail: req.body.senderEmail,
-          },
-          {
-            $push: {
-              userChats: {
-                $position: 0,
-                $each: [
-                  {
-                    type: "singleChat",
-                    participantName: doc.userName,
-                    participantEmail: req.body.recipientEmail,
-                    roomID: req.body.roomID,
-                  },
-                ],
-              },
-            },
-          }
-        )
-        .then((res) => console.log(res))
-        .catch((err) => {
-          console.log(err);
-          res.status(500).json(err);
-        });
+      // db.collection("chat-spider-users")
+      //   .updateOne(
+      //     {
+      //       userEmail: req.body.senderEmail,
+      //     },
+      //     {
+      //       $push: {
+      //         userChats: {
+      //           $position: 0,
+      //           $each: [
+      //             {
+      //               type: "singleChat",
+      //               participantName: doc.userName,
+      //               participantEmail: req.body.recipientEmail,
+      //               roomID: req.body.roomID,
+      //             },
+      //           ],
+      //         },
+      //       },
+      //     }
+      //   )
+      //   .then((res) => console.log(res))
+      //   .catch((err) => {
+      //     console.log(err);
+      //     res.status(500).json(err);
+      //   });
 
-      db.collection("chat-spider-users")
-        .updateOne(
-          {
-            userEmail: req.body.recipientEmail,
-          },
-          {
-            $push: {
-              userChats: {
-                $position: 0,
-                $each: [
-                  {
-                    type: "singleChat",
-                    participantName: req.body.senderName,
-                    participantEmail: req.body.senderEmail,
-                    roomID: req.body.roomID,
-                  },
-                ],
-              },
-            },
-          }
-        )
-        .then((res) => console.log(res))
-        .catch((err) => {
-          console.log(err);
-          res.status(500).json(err);
-        });
+      // db.collection("chat-spider-users")
+      //   .updateOne(
+      //     {
+      //       userEmail: req.body.recipientEmail,
+      //     },
+      //     {
+      //       $push: {
+      //         userChats: {
+      //           $position: 0,
+      //           $each: [
+      //             {
+      //               type: "singleChat",
+      //               participantName: req.body.senderName,
+      //               participantEmail: req.body.senderEmail,
+      //               roomID: req.body.roomID,
+      //             },
+      //           ],
+      //         },
+      //       },
+      //     }
+      //   )
+      //   .then((res) => console.log(res))
+      //   .catch((err) => {
+      //     console.log(err);
+      //     res.status(500).json(err);
+      //   });
 
-      db.collection("chat-spider-chats")
-        .insertOne({
-          roomID: req.body.roomID,
-          type: "singleChat",
-          messages: [
-            {
-              senderName: req.body.senderName,
-              content: req.body.message,
-            },
-          ],
-        })
-        .then((res) => console.log(res))
-        .catch((err) => {
-          console.log(err);
-          res.status(500).json(err);
-        });
+      // db.collection("chat-spider-chats")
+      //   .insertOne({
+      //     roomID: req.body.roomID,
+      //     type: "singleChat",
+      //     messages: [
+      //       {
+      //         senderName: req.body.senderName,
+      //         content: req.body.message,
+      //       },
+      //     ],
+      //   })
+      //   .then((res) => console.log(res))
+      //   .catch((err) => {
+      //     console.log(err);
+      //     res.status(500).json(err);
+      //   });
 
       //if recipient is online, we can connect the sender
       //and the recipient to the roomID.
