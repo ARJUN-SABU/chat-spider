@@ -116,6 +116,13 @@ function ChatPage() {
 
   socket.on("recieve-new-message", (message) => {
     console.log(message);
+    setUserChatList((previous) => {
+      let idx = previous.findIndex(
+        (userChat) => userChat.roomID === message.roomID
+      );
+      let removedChat = previous.splice(idx, 1)[0];
+      return [removedChat, ...previous];
+    });
   });
 
   //------------------------------- utitlity functions -------------------------------
@@ -255,6 +262,17 @@ function ChatPage() {
       handleChatPreviewClick(sameEmailChat[0].roomID);
       //send the message using socket......
       // sendMessageToRoomID();
+
+      if (newSingleChatMessage.current.value === "") {
+        return;
+      }
+
+      socket.emit("send-new-message", {
+        senderName: currentUser.name,
+        senderEmail: currentUser.email,
+        content: newSingleChatMessage.current.value,
+        roomID: sameEmailChat[0].roomID,
+      });
     } else {
       //new chat
       let roomID = `single-${uuid4()}`;
