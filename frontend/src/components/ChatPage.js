@@ -33,6 +33,7 @@ function ChatPage() {
   const newSingleChatMessage = useRef();
   const newGroupName = useRef();
   const groupRoomIDToJoin = useRef();
+  const newMessage = useRef();
 
   useEffect(() => {
     //TODO:
@@ -111,6 +112,10 @@ function ChatPage() {
       console.log(removedChat);
       return [removedChat[0], ...previous];
     });
+  });
+
+  socket.on("recieve-new-message", (message) => {
+    console.log(message);
   });
 
   //------------------------------- utitlity functions -------------------------------
@@ -355,6 +360,23 @@ function ChatPage() {
       });
   }
 
+  function sendMessage() {
+    if (newMessage.current.value === "") {
+      alert("Message cannot be empty!");
+      return;
+    }
+
+    socket.emit("send-new-message", {
+      senderName: currentUser.name,
+      senderEmail: currentUser.email,
+      content: newMessage.current.value,
+      roomID: currentChatWindow,
+    });
+
+    newMessage.current.value = "";
+    newMessage.current.style.height = "20px";
+  }
+
   return (
     <div className="chatPage">
       <div className="chatPage__leftSection">
@@ -521,9 +543,13 @@ function ChatPage() {
           <textarea
             className="chatPage__rightSection__bottom__inputArea"
             onChange={autoGrowInputArea}
+            ref={newMessage}
           />
 
-          <button className="chatPage__rightSection__bottom__sendMessage">
+          <button
+            className="chatPage__rightSection__bottom__sendMessage"
+            onClick={sendMessage}
+          >
             <IoSend />
           </button>
         </div>
