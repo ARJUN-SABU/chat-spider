@@ -32,6 +32,7 @@ function ChatPage() {
   const newSingleChatUserEmail = useRef();
   const newSingleChatMessage = useRef();
   const newGroupName = useRef();
+  const groupRoomIDToJoin = useRef();
 
   useEffect(() => {
     //TODO:
@@ -47,17 +48,21 @@ function ChatPage() {
 
         setUserChatList(userDoc.userChats);
         setUniqueContacts(getUniqueContacts(userDoc.userChats));
+
+        //Send the current user's email to the server by this hello message
+        //so that the server can create an email to socket object mapping and
+        //register the current user. This way the server stores the information
+        //about whether the current user is still connected to the server or not.
+        //Also, we can grab that user (i.e, the user's socket object) with this
+        //specific email address and make it join a room when a new individual
+        //chat is created.
+
+        socket.emit("register-user", {
+          userEmail: params.userId,
+          chatRoomIDs: userDoc.userChats.map((userChat) => userChat.roomID),
+        });
       })
       .catch((err) => console.log(err));
-
-    //Send the current user's email to the server by this hello message
-    //so that the server can create an email to socket object mapping and
-    //register the current user. This way the server stores the information
-    //about whether the current user is still connected to the server or not.
-    //Also, we can grab that user (i.e, the user's socket object) with this
-    //specific email address and make it join a room when a new individual
-    //chat is created.
-    socket.emit("register-user", params.userId);
   }, []);
 
   // ------------------------------- socket events -------------------------------
@@ -80,10 +85,6 @@ function ChatPage() {
       },
       ...previous,
     ]);
-
-    // setTimeout(() => {
-    //   handleChatPreviewClick(message.roomID);
-    // }, 100);
   });
 
   socket.on("new-group-creation-notification", (message) => {
@@ -98,6 +99,18 @@ function ChatPage() {
       },
       ...previous,
     ]);
+  });
+
+  socket.on("new-user-joined", (message) => {
+    console.log(message);
+    setUserChatList((previous) => {
+      let idx = previous.findIndex(
+        (userChat) => userChat.roomID === message.roomID
+      );
+      let removedChat = previous.splice(idx, 1);
+      console.log(removedChat);
+      return [removedChat[0], ...previous];
+    });
   });
 
   //------------------------------- utitlity functions -------------------------------
@@ -129,6 +142,9 @@ function ChatPage() {
     document
       .querySelector(`#chatWindow-${chatRoomID}`)
       ?.classList.remove("hide");
+    document
+      .querySelector(".chatPage__rightSection__bottom")
+      .classList.remove("hide");
     setCurrentChatWindow(chatRoomID);
   }
 
@@ -286,6 +302,59 @@ function ChatPage() {
     }
   }
 
+  function handleGroupJoining() {
+    if (groupRoomIDToJoin.current.value === "") {
+      alert("Group ID cannot be empty!");
+      return;
+    }
+
+    let sameRoomIDGroup = userChatList.filter((userChat) => {
+      if (
+        userChat.type === "groupChat" &&
+        userChat.roomID === groupRoomIDToJoin.current.value
+      )
+        return userChat;
+    });
+
+    if (sameRoomIDGroup.length > 0) {
+      handleLeftPanel("chatPage__leftSection__bottom--chatsPanel");
+      handleChatPreviewClick(sameRoomIDGroup[0].roomID);
+      return;
+    }
+
+    fetch("http://localhost:8000/join-new-group", {
+      method: "post",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        roomID: groupRoomIDToJoin.current.value,
+        userEmail: currentUser.email,
+        userName: currentUser.name,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        setUserChatList((previous) => [
+          {
+            type: "groupChat",
+            roomID: groupRoomIDToJoin.current.value,
+            groupName: data.groupName,
+          },
+          ...previous,
+        ]);
+
+        handleLeftPanel("chatPage__leftSection__bottom--chatsPanel");
+        setTimeout(() => {
+          handleChatPreviewClick(groupRoomIDToJoin.current.value);
+        }, 100);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
   return (
     <div className="chatPage">
       <div className="chatPage__leftSection">
@@ -384,7 +453,12 @@ function ChatPage() {
         </div>
         <div className="chatPage__leftSection__bottom chatPage__leftSection__bottom--joinNewGroupPanel hide">
           <p>Join a group</p>
-          <input type="text" placeholder="Enter the group id" />
+          <input
+            type="text"
+            placeholder="Enter the group id"
+            ref={groupRoomIDToJoin}
+          />
+          <button onClick={handleGroupJoining}>Join</button>
         </div>
         <div className="chatPage__leftSection__bottom chatPage__leftSection__bottom--createNewGroupPanel hide">
           <p>Create a new group</p>
@@ -428,7 +502,7 @@ function ChatPage() {
             className="chatPage__rightSection__middle__liveChatWindow"
             id="noWindowSelectedScreen"
           >
-            <p>No window is selected right now234234234234</p>
+            <p>No window is selected right now</p>
           </div>
 
           {userChatList.map((userChat) => (
@@ -437,11 +511,12 @@ function ChatPage() {
               className="chatPage__rightSection__middle__liveChatWindow hide"
               id={`chatWindow-${userChat.roomID}`}
             >
-              {userChat.participantName || userChat.groupName}
+              <p>{userChat.participantName || userChat.groupName}</p>
+              <p>RoomID: {currentChatWindow}</p>
             </div>
           ))}
         </div>
-        <div className="chatPage__rightSection__bottom">
+        <div className="chatPage__rightSection__bottom hide">
           {/* <div>Adding smiley selector later</div> */}
           <textarea
             className="chatPage__rightSection__bottom__inputArea"

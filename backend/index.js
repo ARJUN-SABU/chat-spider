@@ -49,10 +49,13 @@ let io = new Server(server_new, {
 });
 io.on("connection", (socket) => {
   console.log("Socket ID --> " + socket.id);
-  socket.on("register-user", (userEmail) => {
-    console.log("User's Email ---> " + userEmail);
-    usersEmailToSocketMap.set(userEmail, socket);
-    usersSocketToEmailMap.set(socket, userEmail);
+  socket.on("register-user", (userBlock) => {
+    console.log("User's Email ---> " + userBlock.userEmail);
+    usersEmailToSocketMap.set(userBlock.userEmail, socket);
+    usersSocketToEmailMap.set(socket, userBlock.userEmail);
+
+    //join the user to all the rooms the user is part of
+    userBlock.chatRoomIDs.forEach((chatRoomID) => socket.join(chatRoomID));
   });
 
   socket.on("disconnect", () => {
@@ -268,4 +271,107 @@ app.post("/create-new-group", (req, res) => {
   res.status(200).json({
     message: "Group creation was successful",
   });
+});
+
+app.post("/join-new-group", (req, res) => {
+  console.log(req.body);
+
+  db.collection("chat-spider-chats")
+    .findOne(
+      {
+        roomID: req.body.roomID,
+      },
+      {
+        projection: {
+          groupName: 1,
+        },
+      }
+    )
+    .then((doc) => {
+      console.log(doc);
+      if (!doc) {
+        res.status(400).json({
+          error_message: "Group with the given ID doesn't exist",
+        });
+      }
+
+      //update the database
+      // db.collection("chat-spider-chats")
+      //   .updateOne(
+      //     {
+      //       roomID: req.body.roomID,
+      //     },
+      //     {
+      //       $push: {
+      //         participants: {
+      //           name: req.body.userName,
+      //           email: req.body.userEmail,
+      //         },
+      //       },
+      //     }
+      //   )
+      //   .then((res) => {
+      //     console.log(res);
+      //   })
+      //   .catch((err) => {
+      //     console.log(err);
+      //     res.status(500).json({
+      //       error_message: "Group couldn't be created",
+      //     });
+      //   });
+
+      db.collection("chat-spider-users")
+        .updateOne(
+          {
+            userEmail: req.body.userEmail,
+          },
+          {
+            $push: {
+              userChats: {
+                $position: 0,
+                $each: [
+                  {
+                    type: "groupChat",
+                    roomID: req.body.roomID,
+                    groupName: doc.groupName,
+                  },
+                ],
+              },
+            },
+          }
+        )
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({
+            error_message: "group was not created",
+          });
+        });
+
+      //join the group with the given roomID
+      //also update the members
+
+      usersEmailToSocketMap.get(req.body.userEmail).join(req.body.roomID);
+      usersEmailToSocketMap
+        .get(req.body.userEmail)
+        .to(req.body.roomID)
+        .emit("new-user-joined", {
+          userName: req.body.userName,
+          userEmail: req.body.userEmail,
+          roomID: req.body.roomID,
+        });
+
+      res.status(200).json({
+        message: "Group joined successfully",
+        groupName: doc.groupName,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(400).json({
+        error_message: "Group with the given ID doesn't exist",
+      });
+    });
 });
