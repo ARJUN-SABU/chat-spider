@@ -1,7 +1,12 @@
 //styles
 import "../styles/ChatPreview.css";
 
-function ChatPreview({ chatPreviewName, handleOnClickFunction, roomID }) {
+function ChatPreview({
+  chatPreviewName,
+  handleOnClickFunction,
+  roomID,
+  unReadCount,
+}) {
   return (
     <div className="chatPreview" onClick={() => handleOnClickFunction(roomID)}>
       <div className="chatPreview__left">{/* Avatar */}</div>
@@ -11,7 +16,7 @@ function ChatPreview({ chatPreviewName, handleOnClickFunction, roomID }) {
       </div>
       <div className="chatPreview__right">
         <p>10:03</p>
-        <p>2</p>
+        <p>{unReadCount === 0 ? "" : unReadCount}</p>
       </div>
     </div>
   );

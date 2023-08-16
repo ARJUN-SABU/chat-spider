@@ -6,6 +6,7 @@ import uuid4 from "uuid4";
 
 //components
 import ChatPreview from "./ChatPreview";
+import SingleMessageBlock from "./SingleMessageBlock";
 
 //icons
 import { IoSend, IoCloseCircle } from "react-icons/io5";
@@ -28,6 +29,14 @@ function ChatPage() {
   const [currentLeftPanel, setCurrentLeftPanel] = useState(
     "chatPage__leftSection__bottom--chatsPanel"
   );
+  const [chatRoomIDToUnreadMessagesMap, setChatRoomIDToUnreadMessagesMap] =
+    useState(new Map());
+
+  const [displayedMessageCountMap, setDisplayedMessageCountMap] = useState(
+    new Map()
+  );
+  const [fetchedAllMessagesMap, setFetchedAllMessagesMap] = useState(new Map());
+  const [loadingMessages, setLoadingMessages] = useState(false);
 
   const newSingleChatUserEmail = useRef();
   const newSingleChatMessage = useRef();
@@ -49,6 +58,14 @@ function ChatPage() {
 
         setUserChatList(userDoc.userChats);
         setUniqueContacts(getUniqueContacts(userDoc.userChats));
+        setChatRoomIDToUnreadMessagesMap((previous) => {
+          userDoc.userChats.forEach((userChat) => {
+            previous.set(userChat.roomID, []);
+            displayedMessageCountMap.set(userChat.roomID, 0);
+            fetchedAllMessagesMap.set(userChat.roomID, false);
+          });
+          return previous;
+        });
 
         //Send the current user's email to the server by this hello message
         //so that the server can create an email to socket object mapping and
@@ -69,6 +86,10 @@ function ChatPage() {
   // ------------------------------- socket events -------------------------------
   socket.on("new-singleChat-start-message", (message) => {
     console.log("This is the new message -> ", message);
+    chatRoomIDToUnreadMessagesMap.set(message.roomID, []);
+    displayedMessageCountMap.set(message.roomID, 0);
+    fetchedAllMessagesMap.set(message.roomID, false);
+
     setUserChatList((previous) => [
       {
         type: "singleChat",
@@ -86,11 +107,39 @@ function ChatPage() {
       },
       ...previous,
     ]);
+
+    setCurrentChatWindow((currentSelectedChat) => {
+      if (currentSelectedChat === message.roomID) {
+        displayMessages(
+          [
+            {
+              senderName: message.senderName,
+              senderEmail: message.senderEmail,
+              content: message.messageContent,
+            },
+          ],
+          message.roomID
+        );
+      } else {
+        chatRoomIDToUnreadMessagesMap.get(message.roomID).push({
+          senderName: message.senderName,
+          senderEmail: message.senderEmail,
+          content: message.messageContent,
+        });
+      }
+
+      return currentSelectedChat;
+    });
   });
 
   socket.on("new-group-creation-notification", (message) => {
     // console.log(message);
     // console.log(userChatList);
+
+    console.log("Hohohohohoh group was created");
+    chatRoomIDToUnreadMessagesMap.set(message.roomID, []);
+    displayedMessageCountMap.set(message.roomID, 0);
+    fetchedAllMessagesMap.set(message.roomID, false);
 
     setUserChatList((previous) => [
       {
@@ -116,6 +165,9 @@ function ChatPage() {
 
   socket.on("recieve-new-message", (message) => {
     console.log(message);
+
+    //Bring that chat from to the top from whcih we
+    //recieved the latest message.
     setUserChatList((previous) => {
       let idx = previous.findIndex(
         (userChat) => userChat.roomID === message.roomID
@@ -123,9 +175,68 @@ function ChatPage() {
       let removedChat = previous.splice(idx, 1)[0];
       return [removedChat, ...previous];
     });
+
+    setCurrentChatWindow((currentSelectedChat) => {
+      if (currentSelectedChat === message.roomID) {
+        displayMessages(
+          [
+            {
+              senderName: message.senderName,
+              senderEmail: message.senderEmail,
+              content: message.content,
+            },
+          ],
+          message.roomID
+        );
+
+        document.querySelector(`#chatWindow-${message.roomID}`).scrollTop =
+          document.querySelector(`#chatWindow-${message.roomID}`).scrollHeight;
+      } else {
+        chatRoomIDToUnreadMessagesMap.get(message.roomID).push({
+          senderName: message.senderName,
+          senderEmail: message.senderEmail,
+          content: message.content,
+        });
+      }
+
+      return currentSelectedChat;
+    });
   });
 
   //------------------------------- utitlity functions -------------------------------
+
+  function displayMessages(messages, chatRoomID) {
+    console.log(messages);
+
+    messages.forEach((message) => {
+      let chatWindow = document.querySelector(`#chatWindow-${chatRoomID}`);
+      let messageBlock = document.createElement("div");
+      let senderName = document.createElement("p");
+      senderName.innerText = message.senderName;
+      let messageContent = document.createElement("p");
+      messageContent.innerText = message.content;
+
+      messageBlock.append(senderName);
+      messageBlock.append(messageContent);
+
+      console.log(messageBlock);
+      chatWindow.append(messageBlock);
+    });
+  }
+
+  function displayPreviousMessagesOnTop(messages, roomID) {
+    let chatWindow = document.querySelector(`#chatWindow-${roomID}`);
+    messages.forEach((message) => {
+      let messageBlock = document.createElement("div");
+      let senderName = document.createElement("p");
+      senderName.innerText = message.senderName;
+      let messageContent = document.createElement("p");
+      messageContent.innerText = message.content;
+      messageBlock.append(senderName);
+      messageBlock.append(messageContent);
+      chatWindow.insertBefore(messageBlock, chatWindow.children[0]);
+    });
+  }
 
   function getUniqueContacts(userChats) {
     let uniqueContacts = [];
@@ -154,9 +265,56 @@ function ChatPage() {
     document
       .querySelector(`#chatWindow-${chatRoomID}`)
       ?.classList.remove("hide");
+
     document
       .querySelector(".chatPage__rightSection__bottom")
       .classList.remove("hide");
+
+    //if this chat was opened for the first time, then
+    //only make an API call and get the last 20 chats
+    //the current chat were also sent to the database.
+    //so they are also included in the last 20 chats.
+    if (displayedMessageCountMap.get(chatRoomID) === 0) {
+      fetch(`http://localhost:8000/get-messages/${chatRoomID}/0`)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+
+          //render these messages
+          displayMessages(data.messages.reverse(), chatRoomID);
+          document.querySelector(`#chatWindow-${chatRoomID}`).scrollTop =
+            document.querySelector(`#chatWindow-${chatRoomID}`).scrollHeight;
+
+          //the cached messages don't have to be considered now
+          //because we already got those messages from the db.
+          // chatRoomIDToUnreadMessagesMap.set(chatRoomID, []);
+          setChatRoomIDToUnreadMessagesMap((previous) => {
+            previous.set(chatRoomID, []);
+            return new Map(previous);
+          });
+
+          //update the count of how many messages have to be skipped
+          //next time.
+          displayedMessageCountMap.set(chatRoomID, data.messages.length);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else {
+      let currentChatMessages = chatRoomIDToUnreadMessagesMap.get(chatRoomID);
+      if (currentChatMessages.length !== 0) {
+        displayMessages(currentChatMessages, chatRoomID);
+        document.querySelector(`#chatWindow-${chatRoomID}`).scrollTop =
+          document.querySelector(`#chatWindow-${chatRoomID}`).scrollHeight;
+
+        chatRoomIDToUnreadMessagesMap.set(chatRoomID, []);
+        displayedMessageCountMap.set(
+          chatRoomID,
+          displayedMessageCountMap.get(chatRoomID) + currentChatMessages.length
+        );
+      }
+    }
+
     setCurrentChatWindow(chatRoomID);
   }
 
@@ -232,6 +390,9 @@ function ChatPage() {
           ...userChatList,
         ]);
 
+        chatRoomIDToUnreadMessagesMap.set(`group-${roomID}`, []);
+        displayedMessageCountMap.set(`group-${roomID}`, 0);
+        fetchedAllMessagesMap.set(`group-${roomID}`, false);
         handleLeftPanel("chatPage__leftSection__bottom--chatsPanel");
         setTimeout(() => {
           handleChatPreviewClick(`group-${roomID}`);
@@ -260,8 +421,6 @@ function ChatPage() {
     if (sameEmailChat.length > 0) {
       handleLeftPanel("chatPage__leftSection__bottom--chatsPanel");
       handleChatPreviewClick(sameEmailChat[0].roomID);
-      //send the message using socket......
-      // sendMessageToRoomID();
 
       if (newSingleChatMessage.current.value === "") {
         return;
@@ -296,8 +455,6 @@ function ChatPage() {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("huehuehuehuehue ---> ", data.recipientName);
-
           setUserChatList([
             {
               type: "singleChat",
@@ -314,6 +471,17 @@ function ChatPage() {
               email: newSingleChatUserEmail.current.value,
             },
             ...uniqueContacts,
+          ]);
+
+          chatRoomIDToUnreadMessagesMap.set(roomID, [
+            {
+              senderName: currentUser.name,
+              senderEmail: currentUser.email,
+              content:
+                newSingleChatMessage.current.value === ""
+                  ? "Hi!"
+                  : newSingleChatMessage.current.value,
+            },
           ]);
 
           handleLeftPanel("chatPage__leftSection__bottom--chatsPanel");
@@ -369,6 +537,9 @@ function ChatPage() {
         ]);
 
         handleLeftPanel("chatPage__leftSection__bottom--chatsPanel");
+        chatRoomIDToUnreadMessagesMap.set(groupRoomIDToJoin.current.value, []);
+        displayedMessageCountMap.set(groupRoomIDToJoin.current.value, 0);
+        fetchedAllMessagesMap.set(groupRoomIDToJoin.current.value, false);
         setTimeout(() => {
           handleChatPreviewClick(groupRoomIDToJoin.current.value);
         }, 100);
@@ -393,6 +564,40 @@ function ChatPage() {
 
     newMessage.current.value = "";
     newMessage.current.style.height = "20px";
+  }
+
+  function handleChatWindowScrolling(roomID) {
+    if (document.querySelector(`#chatWindow-${roomID}`).scrollTop == 0) {
+      if (!loadingMessages && !fetchedAllMessagesMap.get(roomID)) {
+        setLoadingMessages(true);
+        fetch(
+          `http://localhost:8000/get-messages/${roomID}/${displayedMessageCountMap.get(
+            roomID
+          )}`
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data);
+            setLoadingMessages(false);
+
+            if (data.messages.length === 0) {
+              // fetchedAllMessagesMap
+              fetchedAllMessagesMap.set(roomID, true);
+            } else {
+              displayedMessageCountMap.set(
+                roomID,
+                displayedMessageCountMap.get(roomID) + data.messages.length
+              );
+
+              displayPreviousMessagesOnTop(data.messages, roomID);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+      console.log(loadingMessages);
+    }
   }
 
   return (
@@ -430,6 +635,9 @@ function ChatPage() {
                 chatPreviewName={userChat.participantName}
                 roomID={userChat.roomID}
                 handleOnClickFunction={handleChatPreviewClick}
+                unReadCount={
+                  chatRoomIDToUnreadMessagesMap.get(userChat.roomID).length
+                }
               />
             ) : (
               <ChatPreview
@@ -437,6 +645,9 @@ function ChatPage() {
                 chatPreviewName={userChat.groupName}
                 roomID={userChat.roomID}
                 handleOnClickFunction={handleChatPreviewClick}
+                unReadCount={
+                  chatRoomIDToUnreadMessagesMap.get(userChat.roomID).length
+                }
               />
             )
           )}
@@ -550,9 +761,10 @@ function ChatPage() {
               key={`chatWindow-${userChat.roomID}`}
               className="chatPage__rightSection__middle__liveChatWindow hide"
               id={`chatWindow-${userChat.roomID}`}
+              onScroll={() => handleChatWindowScrolling(userChat.roomID)}
             >
-              <p>{userChat.participantName || userChat.groupName}</p>
-              <p>RoomID: {currentChatWindow}</p>
+              {/* <p>{userChat.participantName || userChat.groupName}</p>
+              <p>RoomID: {currentChatWindow}</p> */}
             </div>
           ))}
         </div>
