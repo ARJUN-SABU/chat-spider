@@ -447,3 +447,33 @@ app.get("/get-messages/:roomID/:messagesToBeSkipped", (req, res) => {
       res.send(err);
     });
 });
+
+app.get("/chat-preview-message/:roomID", (req, res) => {
+  db.collection("chat-spider-chats")
+    .findOne(
+      {
+        roomID: req.params.roomID,
+      },
+      {
+        projection: {
+          groupName: 0,
+          participants: 0,
+          roomID: 0,
+          type: 0,
+          _id: 0,
+          messages: {
+            $slice: [0, 1],
+          },
+        },
+      }
+    )
+    .then((doc) => {
+      console.log(doc);
+      res.status(200).json({
+        message: doc.messages[0].content,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});

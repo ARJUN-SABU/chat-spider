@@ -37,6 +37,8 @@ function ChatPage() {
     new Map()
   );
   const [fetchedAllMessagesMap, setFetchedAllMessagesMap] = useState(new Map());
+  const [roomPreviewMessageMap, setRoomPreviewMessageMap] = useState(new Map());
+
   const [loadingMessages, setLoadingMessages] = useState(false);
 
   const newSingleChatUserEmail = useRef();
@@ -68,6 +70,30 @@ function ChatPage() {
           return previous;
         });
 
+        userDoc.userChats.forEach((userChat) => {
+          fetch(`http://localhost:8000/chat-preview-message/${userChat.roomID}`)
+            .then((res) => res.json())
+            .then((data) => {
+              console.log(data);
+
+              setRoomPreviewMessageMap((previousMap) => {
+                previousMap.set(
+                  userChat.roomID,
+                  data.message.substring(0, 20) + "..."
+                );
+
+                return new Map(previousMap);
+              });
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        });
+
+        setRoomPreviewMessageMap((previousMap) => {
+          return new Map(previousMap);
+        });
+
         //Send the current user's email to the server by this hello message
         //so that the server can create an email to socket object mapping and
         //register the current user. This way the server stores the information
@@ -90,6 +116,10 @@ function ChatPage() {
     chatRoomIDToUnreadMessagesMap.set(message.roomID, []);
     displayedMessageCountMap.set(message.roomID, 0);
     fetchedAllMessagesMap.set(message.roomID, false);
+    setRoomPreviewMessageMap((previousMap) => {
+      previousMap.set(message.roomID, message.messageContent);
+      return new Map(previousMap);
+    });
 
     setUserChatList((previous) => [
       {
@@ -141,6 +171,10 @@ function ChatPage() {
     chatRoomIDToUnreadMessagesMap.set(message.roomID, []);
     displayedMessageCountMap.set(message.roomID, 0);
     fetchedAllMessagesMap.set(message.roomID, false);
+    setRoomPreviewMessageMap((previousMap) => {
+      previousMap.set(message.roomID, "");
+      return new Map(previousMap);
+    });
 
     setUserChatList((previous) => [
       {
@@ -175,6 +209,11 @@ function ChatPage() {
       );
       let removedChat = previous.splice(idx, 1)[0];
       return [removedChat, ...previous];
+    });
+
+    setRoomPreviewMessageMap((previousMap) => {
+      previousMap.set(message.roomID, message.content);
+      return new Map(previousMap);
     });
 
     setCurrentChatWindow((currentSelectedChat) => {
@@ -396,6 +435,10 @@ function ChatPage() {
         chatRoomIDToUnreadMessagesMap.set(`group-${roomID}`, []);
         displayedMessageCountMap.set(`group-${roomID}`, 0);
         fetchedAllMessagesMap.set(`group-${roomID}`, false);
+        setRoomPreviewMessageMap((previousMap) => {
+          previousMap.set(`group-${roomID}`, "");
+          return new Map(previousMap);
+        });
         handleLeftPanel("chatPage__leftSection__bottom--chatsPanel");
         setTimeout(() => {
           handleChatPreviewClick(`group-${roomID}`, newGroupName.current.value);
@@ -490,6 +533,16 @@ function ChatPage() {
             },
           ]);
 
+          setRoomPreviewMessageMap((previousMap) => {
+            previousMap.set(
+              roomID,
+              newSingleChatMessage.current.value === ""
+                ? "Hi!"
+                : newSingleChatMessage.current.value
+            );
+            return new Map(previousMap);
+          });
+
           handleLeftPanel("chatPage__leftSection__bottom--chatsPanel");
           setTimeout(() => {
             handleChatPreviewClick(roomID, data.recipientName);
@@ -549,6 +602,23 @@ function ChatPage() {
         chatRoomIDToUnreadMessagesMap.set(groupRoomIDToJoin.current.value, []);
         displayedMessageCountMap.set(groupRoomIDToJoin.current.value, 0);
         fetchedAllMessagesMap.set(groupRoomIDToJoin.current.value, false);
+
+        //get the latest message of the group
+        fetch(
+          `http://localhost:8000/chat-preview-message/${groupRoomIDToJoin.current.value}`
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data);
+            setRoomPreviewMessageMap((previousMap) => {
+              previousMap.set(groupRoomIDToJoin.current.value, data.message);
+              return new Map(previousMap);
+            });
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+
         setTimeout(() => {
           handleChatPreviewClick(
             groupRoomIDToJoin.current.value,
@@ -645,6 +715,7 @@ function ChatPage() {
               <ChatPreview
                 key={`chatPreview-${userChat.roomID}`}
                 chatPreviewName={userChat.participantName}
+                chatPreviewMessage={roomPreviewMessageMap.get(userChat.roomID)}
                 roomID={userChat.roomID}
                 handleOnClickFunction={handleChatPreviewClick}
                 unReadCount={
@@ -655,6 +726,7 @@ function ChatPage() {
               <ChatPreview
                 key={`chatPreview-${userChat.roomID}`}
                 chatPreviewName={userChat.groupName}
+                chatPreviewMessage={roomPreviewMessageMap.get(userChat.roomID)}
                 roomID={userChat.roomID}
                 handleOnClickFunction={handleChatPreviewClick}
                 unReadCount={

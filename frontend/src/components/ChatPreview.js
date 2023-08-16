@@ -4,6 +4,7 @@ import "../styles/ChatPreview.css";
 function ChatPreview({
   chatPreviewName,
   handleOnClickFunction,
+  chatPreviewMessage,
   roomID,
   unReadCount,
 }) {
@@ -15,7 +16,7 @@ function ChatPreview({
       <div className="chatPreview__left">{/* Avatar */}</div>
       <div className="chatPreview__middle">
         <h3>{chatPreviewName}</h3>
-        <p>This is the latest message</p>
+        <p>{chatPreviewMessage}</p>
       </div>
       <div className="chatPreview__right">
         <p>10:03</p>
