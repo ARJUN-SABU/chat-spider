@@ -22,6 +22,7 @@ function ChatPage() {
   const [userChatList, setUserChatList] = useState([]);
   const [uniqueContacts, setUniqueContacts] = useState([]);
   const [currentChatWindow, setCurrentChatWindow] = useState(null);
+  const [chatWindowName, setChatWindowName] = useState("");
   const [currentUser, setCurrentUser] = useState({
     email: "",
     name: "",
@@ -254,7 +255,7 @@ function ChatPage() {
 
   //to handle the actions when one of the chat window is opened
   //by selecting a user's chat from the left.
-  function handleChatPreviewClick(chatRoomID) {
+  function handleChatPreviewClick(chatRoomID, chatName) {
     if (!currentChatWindow) {
       document.querySelector("#noWindowSelectedScreen").classList.add("hide");
     } else {
@@ -315,6 +316,8 @@ function ChatPage() {
       }
     }
 
+    console.log("Chat Name", chatName);
+    setChatWindowName(chatName);
     setCurrentChatWindow(chatRoomID);
   }
 
@@ -395,7 +398,7 @@ function ChatPage() {
         fetchedAllMessagesMap.set(`group-${roomID}`, false);
         handleLeftPanel("chatPage__leftSection__bottom--chatsPanel");
         setTimeout(() => {
-          handleChatPreviewClick(`group-${roomID}`);
+          handleChatPreviewClick(`group-${roomID}`, newGroupName.current.value);
         }, 100);
       })
       .catch((err) => console.log(err));
@@ -420,7 +423,10 @@ function ChatPage() {
     );
     if (sameEmailChat.length > 0) {
       handleLeftPanel("chatPage__leftSection__bottom--chatsPanel");
-      handleChatPreviewClick(sameEmailChat[0].roomID);
+      handleChatPreviewClick(
+        sameEmailChat[0].roomID,
+        sameEmailChat[0].participantName
+      );
 
       if (newSingleChatMessage.current.value === "") {
         return;
@@ -486,7 +492,7 @@ function ChatPage() {
 
           handleLeftPanel("chatPage__leftSection__bottom--chatsPanel");
           setTimeout(() => {
-            handleChatPreviewClick(roomID);
+            handleChatPreviewClick(roomID, data.recipientName);
           }, 100);
         })
         .catch((err) => console.log(err));
@@ -509,7 +515,10 @@ function ChatPage() {
 
     if (sameRoomIDGroup.length > 0) {
       handleLeftPanel("chatPage__leftSection__bottom--chatsPanel");
-      handleChatPreviewClick(sameRoomIDGroup[0].roomID);
+      handleChatPreviewClick(
+        sameRoomIDGroup[0].roomID,
+        sameRoomIDGroup[0].groupName
+      );
       return;
     }
 
@@ -541,7 +550,10 @@ function ChatPage() {
         displayedMessageCountMap.set(groupRoomIDToJoin.current.value, 0);
         fetchedAllMessagesMap.set(groupRoomIDToJoin.current.value, false);
         setTimeout(() => {
-          handleChatPreviewClick(groupRoomIDToJoin.current.value);
+          handleChatPreviewClick(
+            groupRoomIDToJoin.current.value,
+            data.groupName
+          );
         }, 100);
       })
       .catch((err) => {
@@ -738,8 +750,8 @@ function ChatPage() {
       <div className="chatPage__rightSection">
         <div className="chatPage__rightSection__top">
           <div>
-            {/* User/Group Avatar */}
-            {/* User/Group Name */}
+            <h4>{chatWindowName}</h4>
+            <p>RoomID: {currentChatWindow}</p>
           </div>
           <div>
             {/* options/menu symbol
@@ -763,8 +775,8 @@ function ChatPage() {
               id={`chatWindow-${userChat.roomID}`}
               onScroll={() => handleChatWindowScrolling(userChat.roomID)}
             >
-              {/* <p>{userChat.participantName || userChat.groupName}</p>
-              <p>RoomID: {currentChatWindow}</p> */}
+              <p>{userChat.participantName || userChat.groupName}</p>
+              <p>RoomID: {currentChatWindow}</p>
             </div>
           ))}
         </div>

@@ -8,7 +8,10 @@ function ChatPreview({
   unReadCount,
 }) {
   return (
-    <div className="chatPreview" onClick={() => handleOnClickFunction(roomID)}>
+    <div
+      className="chatPreview"
+      onClick={() => handleOnClickFunction(roomID, chatPreviewName)}
+    >
       <div className="chatPreview__left">{/* Avatar */}</div>
       <div className="chatPreview__middle">
         <h3>{chatPreviewName}</h3>
