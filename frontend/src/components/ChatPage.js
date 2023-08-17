@@ -82,7 +82,7 @@ function ChatPage() {
               setRoomPreviewMessageMap((previousMap) => {
                 previousMap.set(
                   userChat.roomID,
-                  data.message.substring(0, 20) + "..."
+                  data.message.substring(0, 30) + "..."
                 );
 
                 return new Map(previousMap);
@@ -116,25 +116,25 @@ function ChatPage() {
       .catch((err) => console.log(err));
   }, []);
 
-  useEffect(() => {
-    if (userChatList.length !== 0) {
-      fetch("http://localhost:8000/update-user-chatList", {
-        method: "post",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify({
-          userEmail: currentUser.email,
-          userChats: userChatList,
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-        })
-        .catch((err) => console.log(err));
-    }
-  }, [userChatList]);
+  // useEffect(() => {
+  //   if (userChatList.length !== 0) {
+  //     fetch("http://localhost:8000/update-user-chatList", {
+  //       method: "post",
+  //       headers: {
+  //         "Content-type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         userEmail: currentUser.email,
+  //         userChats: userChatList,
+  //       }),
+  //     })
+  //       .then((res) => res.json())
+  //       .then((data) => {
+  //         console.log(data);
+  //       })
+  //       .catch((err) => console.log(err));
+  //   }
+  // }, [userChatList]);
 
   // ------------------------------- socket events -------------------------------
   socket.on("new-singleChat-start-message", (message) => {
@@ -147,15 +147,20 @@ function ChatPage() {
       return new Map(previousMap);
     });
 
-    setUserChatList((previous) => [
-      {
-        type: "singleChat",
-        participantName: message.senderName,
-        participantEmail: message.senderEmail,
-        roomID: message.roomID,
-      },
-      ...previous,
-    ]);
+    setUserChatList((previous) => {
+      let newChatList = [
+        {
+          type: "singleChat",
+          participantName: message.senderName,
+          participantEmail: message.senderEmail,
+          roomID: message.roomID,
+        },
+        ...previous,
+      ];
+      // updateUserChatList(newChatList);
+
+      return newChatList;
+    });
 
     setUniqueContacts((previous) => [
       {
@@ -202,14 +207,20 @@ function ChatPage() {
       return new Map(previousMap);
     });
 
-    setUserChatList((previous) => [
-      {
-        type: "groupChat",
-        groupName: message.groupName,
-        roomID: message.roomID,
-      },
-      ...previous,
-    ]);
+    setUserChatList((previous) => {
+      let newChatList = [
+        {
+          type: "groupChat",
+          groupName: message.groupName,
+          roomID: message.roomID,
+        },
+        ...previous,
+      ];
+
+      // updateUserChatList(newChatList);
+
+      return newChatList;
+    });
   });
 
   // socket.on("new-user-joined", (message) => {
@@ -235,7 +246,12 @@ function ChatPage() {
         (userChat) => userChat.roomID === message.roomID
       );
       let removedChat = previous.splice(idx, 1)[0];
-      return [removedChat, ...previous];
+
+      let newChatList = [removedChat, ...previous];
+
+      // updateUserChatList(newChatList);
+
+      return newChatList;
     });
 
     setRoomPreviewMessageMap((previousMap) => {
@@ -306,6 +322,24 @@ function ChatPage() {
   });
 
   //------------------------------- utitlity functions -------------------------------
+
+  function updateUserChatList(chatList) {
+    fetch("http://localhost:8000/update-user-chatList", {
+      method: "post",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        userEmail: currentUser.email,
+        userChats: chatList,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((err) => console.log(err));
+  }
 
   function displayMessages(messages, chatRoomID) {
     // console.log(messages);
@@ -528,14 +562,20 @@ function ChatPage() {
       .then((data) => {
         console.log(data);
 
-        setUserChatList([
-          {
-            type: "groupChat",
-            groupName: newGroupName.current.value,
-            roomID: `group-${roomID}`,
-          },
-          ...userChatList,
-        ]);
+        setUserChatList((previous) => {
+          let newChatList = [
+            {
+              type: "groupChat",
+              groupName: newGroupName.current.value,
+              roomID: `group-${roomID}`,
+            },
+            ...previous,
+          ];
+
+          // updateUserChatList(newChatList);
+
+          return newChatList;
+        });
 
         chatRoomIDToUnreadMessagesMap.set(`group-${roomID}`, []);
         displayedMessageCountMap.set(`group-${roomID}`, 0);
@@ -609,15 +649,20 @@ function ChatPage() {
       })
         .then((res) => res.json())
         .then((data) => {
-          setUserChatList([
-            {
-              type: "singleChat",
-              participantName: data.recipientName,
-              participantEmail: newSingleChatUserEmail.current.value,
-              roomID: roomID,
-            },
-            ...userChatList,
-          ]);
+          setUserChatList((previous) => {
+            let newChatList = [
+              {
+                type: "singleChat",
+                participantName: data.recipientName,
+                participantEmail: newSingleChatUserEmail.current.value,
+                roomID: roomID,
+              },
+              ...previous,
+            ];
+            // updateUserChatList(newChatList);
+
+            return newChatList;
+          });
 
           setUniqueContacts([
             {
@@ -694,14 +739,19 @@ function ChatPage() {
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
-        setUserChatList((previous) => [
-          {
-            type: "groupChat",
-            roomID: groupRoomIDToJoin.current.value,
-            groupName: data.groupName,
-          },
-          ...previous,
-        ]);
+        setUserChatList((previous) => {
+          let newChatList = [
+            {
+              type: "groupChat",
+              roomID: groupRoomIDToJoin.current.value,
+              groupName: data.groupName,
+            },
+            ...previous,
+          ];
+
+          // updateUserChatList(newChatList);
+          return newChatList;
+        });
 
         handleLeftPanel("chatPage__leftSection__bottom--chatsPanel");
         chatRoomIDToUnreadMessagesMap.set(groupRoomIDToJoin.current.value, []);
@@ -819,25 +869,36 @@ function ChatPage() {
     <div className="chatPage">
       <div className="chatPage__leftSection">
         <div className="chatPage__leftSection__top">
-          <div>
-            {/* User Avatar */}
-            <h4>{currentUser.name}</h4>
-            {/* User Email */}
+          <div className="chatPage__leftSection__top__userDetails">
+            <h2>{currentUser.name}</h2>
+            <p>{currentUser.email}</p>
           </div>
-          <div>
+          <div className="chatPage__leftSection__top__optionsSection">
             <button
-              onClick={() =>
-                handleLeftPanel("chatPage__leftSection__bottom--MenuPanel")
-              }
+              className="chatPage__leftSection__top__optionsSection__moreOptions"
+              onClick={() => {
+                handleLeftPanel("chatPage__leftSection__bottom--MenuPanel");
+                document
+                  .querySelector(
+                    ".chatPage__leftSection__top__optionsSection__closeOptions"
+                  )
+                  .classList.remove("hide");
+              }}
             >
               More Options
             </button>
             <button
-              onClick={() =>
-                handleLeftPanel("chatPage__leftSection__bottom--chatsPanel")
-              }
+              className="chatPage__leftSection__top__optionsSection__closeOptions hide"
+              onClick={() => {
+                handleLeftPanel("chatPage__leftSection__bottom--chatsPanel");
+                document
+                  .querySelector(
+                    ".chatPage__leftSection__top__optionsSection__closeOptions"
+                  )
+                  .classList.add("hide");
+              }}
             >
-              <IoCloseCircle />
+              Back to Chats
             </button>
           </div>
         </div>

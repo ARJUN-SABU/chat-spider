@@ -13,14 +13,17 @@ function ChatPreview({
       className="chatPreview"
       onClick={() => handleOnClickFunction(roomID, chatPreviewName)}
     >
-      <div className="chatPreview__left">{/* Avatar */}</div>
-      <div className="chatPreview__middle">
+      <div className="chatPreview__left">
         <h3>{chatPreviewName}</h3>
         <p>{chatPreviewMessage}</p>
       </div>
-      <div className="chatPreview__right">
-        <p>{unReadCount === 0 ? "" : unReadCount}</p>
-      </div>
+      {unReadCount === 0 ? (
+        ""
+      ) : (
+        <div className="chatPreview__right">
+          <p>{unReadCount}</p>
+        </div>
+      )}
     </div>
   );
 }

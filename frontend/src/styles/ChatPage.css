@@ -1,15 +1,16 @@
 .chatPage {
   height: 100vh;
   width: 100vw;
-  background-color: red;
+  /* background-color: red; */
   display: flex;
 }
 
 .chatPage__leftSection {
-  width: 260px;
+  width: 340px;
   height: 100vh;
-  background-color: blue;
-  border-right: 3px solid black;
+  background-color: #0e7aef;
+  color: #f1f3f4;
+  /* border-right: 3px solid black; */
   display: flex;
   flex-direction: column;
 }
@@ -21,17 +22,50 @@
   flex-direction: column;
 }
 .chatPage__leftSection__top {
-  height: 30px;
-  background-color: yellow;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  height: max-content;
+  padding: 30px 40px 30px 20px;
+}
+
+.chatPage__leftSection__top__userDetails h2 {
+  font-size: 30px;
+}
+.chatPage__leftSection__top__userDetails p {
+  margin-top: 3px;
+  margin-bottom: 25px;
+}
+.chatPage__leftSection__top__optionsSection {
+  /* display: flex;
+  align-items: center; */
+}
+.chatPage__leftSection__top__optionsSection__moreOptions {
+  width: 100%;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  height: max-content;
+  padding: 10px 8px;
+  background-color: #f1f3f4;
+  color: #0e7aef;
+  border-radius: 14px;
+  font-weight: 600;
+}
+.chatPage__leftSection__top__optionsSection__closeOptions {
+  width: 100%;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  height: max-content;
+  padding: 10px 8px;
+  background-color: #f1f3f4;
+  color: #0e7aef;
+  border-radius: 14px;
+  margin-top: 15px;
 }
 
 .chatPage__leftSection__bottom {
   flex: 1;
   overflow-y: scroll;
-  background-color: orange;
+  /* background-color: orange; */
 }
 
 .chatPage__rightSection__top {
