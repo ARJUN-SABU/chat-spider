@@ -757,6 +757,21 @@ function ChatPage() {
     }
   }
 
+  function closeCurrentChatWindow() {
+    document
+      .querySelector(`#chatWindow-${currentChatWindow}`)
+      .classList.add("hide");
+    document.querySelector("#noWindowSelectedScreen").classList.remove("hide");
+    setCurrentChatWindow(null);
+    document
+      .querySelector(".chatPage__rightSection__bottom")
+      .classList.add("hide");
+
+    document
+      .querySelector(".chatPage__rightSection__top")
+      .classList.add("hide");
+  }
+
   return (
     <div className="chatPage">
       <div className="chatPage__leftSection">
@@ -926,7 +941,7 @@ function ChatPage() {
               ""
             )}
 
-            <button>Close Chat</button>
+            <button onClick={closeCurrentChatWindow}>Close Chat</button>
             {/* options/menu symbol
              for viewing the group members if it is a group chat*/}
             {/* as well as option to show and copy the group id. */}
