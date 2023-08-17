@@ -40,6 +40,8 @@ function ChatPage() {
   const [roomPreviewMessageMap, setRoomPreviewMessageMap] = useState(new Map());
 
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [userIsTyping, setUserIsTyping] = useState("");
+  const [userIsOnline, setUserIsOnline] = useState(false);
 
   const newSingleChatUserEmail = useRef();
   const newSingleChatMessage = useRef();
@@ -104,7 +106,10 @@ function ChatPage() {
 
         socket.emit("register-user", {
           userEmail: params.userId,
-          chatRoomIDs: userDoc.userChats.map((userChat) => userChat.roomID),
+          chatRooms: userDoc.userChats.map((userChat) => ({
+            roomID: userChat.roomID,
+            type: userChat.type,
+          })),
         });
       })
       .catch((err) => console.log(err));
@@ -243,10 +248,43 @@ function ChatPage() {
     });
   });
 
+  socket.on("offline-signal", (chatRoomID) => {
+    setCurrentChatWindow((previous) => {
+      if (previous === chatRoomID) {
+        setUserIsOnline(false);
+      }
+      return previous;
+    });
+  });
+
+  socket.on("online-signal", (chatRoomID) => {
+    setCurrentChatWindow((previous) => {
+      if (previous === chatRoomID) {
+        setUserIsOnline(true);
+      }
+      return previous;
+    });
+  });
+
+  socket.on("recieve-typing-signal", (typingBlock) => {
+    setCurrentUser((currentUserValue) => {
+      if (typingBlock.userEmail !== currentUserValue.email) {
+        setCurrentChatWindow((previous) => {
+          if (previous === typingBlock.roomID) {
+            setUserIsTyping(typingBlock.message);
+          }
+
+          return previous;
+        });
+      }
+      return currentUserValue;
+    });
+  });
+
   //------------------------------- utitlity functions -------------------------------
 
   function displayMessages(messages, chatRoomID) {
-    console.log(messages);
+    // console.log(messages);
 
     messages.forEach((message) => {
       let chatWindow = document.querySelector(`#chatWindow-${chatRoomID}`);
@@ -259,7 +297,7 @@ function ChatPage() {
       messageBlock.append(senderName);
       messageBlock.append(messageContent);
 
-      console.log(messageBlock);
+      // console.log(messageBlock);
       chatWindow.append(messageBlock);
     });
   }
@@ -310,6 +348,29 @@ function ChatPage() {
       .querySelector(".chatPage__rightSection__bottom")
       .classList.remove("hide");
 
+    document
+      .querySelector(".chatPage__rightSection__top")
+      .classList.remove("hide");
+
+    //logic for setting online or offline
+    let singleChatMessage = userChatList.filter(
+      (userChat) =>
+        userChat.type === "singleChat" && userChat.roomID === chatRoomID
+    );
+
+    if (singleChatMessage.length > 0) {
+      fetch(
+        `http://localhost:8000/check-user-online/${chatRoomID}/${currentUser.email}`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          setUserIsOnline(data.online);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+
     //if this chat was opened for the first time, then
     //only make an API call and get the last 20 chats
     //the current chat were also sent to the database.
@@ -355,12 +416,12 @@ function ChatPage() {
       }
     }
 
-    console.log("Chat Name", chatName);
+    setUserIsTyping("");
     setChatWindowName(chatName);
     setCurrentChatWindow(chatRoomID);
   }
 
-  function autoGrowInputArea(event) {
+  function autoGrowInputArea(event, chatInputType) {
     //When a lot of lines are typed and suddenly everything is selected
     //and deleted then the scroll height still remains that many number of lines.
     //So, first we reduce the height to 20px and then if the text's height > textarea's height
@@ -368,6 +429,19 @@ function ChatPage() {
     //as the text area height.
     event.target.style.height = "20px";
     event.target.style.height = event.target.scrollHeight + "px";
+
+    if (chatInputType === "oldChatInput" && event.target.value === "") {
+      sendTypingSignal("");
+    }
+  }
+
+  function sendTypingSignal(typingMessage) {
+    socket.emit("send-typing-signal", {
+      userName: currentUser.name,
+      userEmail: currentUser.email,
+      roomID: currentChatWindow,
+      message: typingMessage,
+    });
   }
 
   function toggleUserSelectionForGroup(targetUser) {
@@ -646,6 +720,7 @@ function ChatPage() {
 
     newMessage.current.value = "";
     newMessage.current.style.height = "20px";
+    sendTypingSignal("");
   }
 
   function handleChatWindowScrolling(roomID) {
@@ -778,7 +853,7 @@ function ChatPage() {
           <textarea
             placeholder="Say Hi!"
             ref={newSingleChatMessage}
-            onChange={autoGrowInputArea}
+            onChange={(event) => autoGrowInputArea(event, "newChatInput")}
             style={{
               resize: "none",
               maxHeight: "100px",
@@ -820,12 +895,38 @@ function ChatPage() {
         </div>
       </div>
       <div className="chatPage__rightSection">
-        <div className="chatPage__rightSection__top">
+        <div className="chatPage__rightSection__top hide">
           <div>
             <h4>{chatWindowName}</h4>
-            <p>RoomID: {currentChatWindow}</p>
+            {currentChatWindow?.includes("group") ? (
+              <div>
+                <p>RoomID: {currentChatWindow}</p>
+                <p>{userIsTyping}</p>
+              </div>
+            ) : (
+              ""
+            )}
+
+            {currentChatWindow?.includes("single") ? (
+              <p>
+                {userIsTyping !== ""
+                  ? userIsTyping
+                  : userIsOnline
+                  ? "online"
+                  : "offline"}
+              </p>
+            ) : (
+              ""
+            )}
           </div>
           <div>
+            {currentChatWindow?.includes("group") ? (
+              <button>Show Members</button>
+            ) : (
+              ""
+            )}
+
+            <button>Close Chat</button>
             {/* options/menu symbol
              for viewing the group members if it is a group chat*/}
             {/* as well as option to show and copy the group id. */}
@@ -856,7 +957,10 @@ function ChatPage() {
           {/* <div>Adding smiley selector later</div> */}
           <textarea
             className="chatPage__rightSection__bottom__inputArea"
-            onChange={autoGrowInputArea}
+            onChange={(event) => autoGrowInputArea(event, "oldChatInput")}
+            onKeyDown={() =>
+              sendTypingSignal(`${currentUser.name} is typing...`)
+            }
             ref={newMessage}
           />
 

@@ -55,7 +55,14 @@ io.on("connection", (socket) => {
     usersSocketToEmailMap.set(socket, userBlock.userEmail);
 
     //join the user to all the rooms the user is part of
-    userBlock.chatRoomIDs.forEach((chatRoomID) => socket.join(chatRoomID));
+    userBlock.chatRooms.forEach((chatRoom) => {
+      socket.join(chatRoom.roomID);
+
+      //also send the rooms that the user has come online
+      if (chatRoom.type === "singleChat") {
+        socket.to(chatRoom.roomID).emit("online-signal", chatRoom.roomID);
+      }
+    });
   });
 
   socket.on("send-new-message", (messageBlock) => {
@@ -96,6 +103,10 @@ io.on("connection", (socket) => {
     //   });
   });
 
+  socket.on("send-typing-signal", (typingBlock) => {
+    socket.to(typingBlock.roomID).emit("recieve-typing-signal", typingBlock);
+  });
+
   socket.on("disconnect", () => {
     // delete usersConnectedToServer[]
 
@@ -103,6 +114,31 @@ io.on("connection", (socket) => {
     usersSocketToEmailMap.delete(socket);
     usersEmailToSocketMap.delete(userEmail);
     console.log(userEmail + " has left the chat ");
+
+    //update the chats to which the current user is connected
+    //that the current user has gone offline
+    db.collection("chat-spider-users")
+      .findOne(
+        {
+          userEmail: userEmail,
+        },
+        {
+          projection: {
+            _id: 0,
+            "userChats.roomID": 1,
+            "userChats.type": 1,
+          },
+        }
+      )
+      .then((doc) => {
+        console.log(doc);
+        doc.userChats.forEach((userChat) => {
+          if (userChat.type === "singleChat") {
+            socket.to(userChat.roomID).emit("offline-signal", userChat.roomID);
+          }
+        });
+      })
+      .catch((err) => console.log(err));
   });
 });
 
@@ -439,7 +475,7 @@ app.get("/get-messages/:roomID/:messagesToBeSkipped", (req, res) => {
       }
     )
     .then((doc) => {
-      console.log(doc);
+      // console.log(doc);
       res.status(200).json(doc);
     })
     .catch((err) => {
@@ -468,10 +504,49 @@ app.get("/chat-preview-message/:roomID", (req, res) => {
       }
     )
     .then((doc) => {
-      console.log(doc);
+      // console.log(doc);
       res.status(200).json({
         message: doc.messages[0].content,
       });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+app.get("/check-user-online/:roomID/:userEmail", (req, res) => {
+  db.collection("chat-spider-chats")
+    .findOne(
+      {
+        roomID: req.params.roomID,
+      },
+      {
+        projection: {
+          _id: 0,
+          participants: 1,
+        },
+      }
+    )
+    .then((doc) => {
+      if (!doc) {
+        res.status(500).json({
+          error_message: "couldn't fetch the document",
+        });
+      }
+
+      let recipientEmail = doc.participants.filter(
+        (participant) => participant.email !== req.params.userEmail
+      )[0].email;
+
+      if (usersEmailToSocketMap.get(recipientEmail)) {
+        res.status(200).json({
+          online: true,
+        });
+      } else {
+        res.status(200).json({
+          online: false,
+        });
+      }
     })
     .catch((err) => {
       console.log(err);
