@@ -38,6 +38,7 @@ function ChatPage() {
   );
   const [fetchedAllMessagesMap, setFetchedAllMessagesMap] = useState(new Map());
   const [roomPreviewMessageMap, setRoomPreviewMessageMap] = useState(new Map());
+  const [currentChatGroupMembers, setCurrentChatGroupMembers] = useState([]);
 
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [userIsTyping, setUserIsTyping] = useState("");
@@ -772,6 +773,18 @@ function ChatPage() {
       .classList.add("hide");
   }
 
+  function showGroupMembers() {
+    fetch(`http://localhost:8000/group-members-list/${currentChatWindow}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setCurrentChatGroupMembers(data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    handleLeftPanel("chatPage__leftSection__bottom--showGroupMembersPanel");
+  }
+
   return (
     <div className="chatPage">
       <div className="chatPage__leftSection">
@@ -908,6 +921,15 @@ function ChatPage() {
           </div>
           <button onClick={createNewGroup}>Create a new group</button>
         </div>
+
+        <div className="chatPage__leftSection__bottom chatPage__leftSection__bottom--showGroupMembersPanel hide">
+          {currentChatGroupMembers.map((groupMember) => (
+            <div>
+              <p>{groupMember.name}</p>
+              <p>{groupMember.email}</p>
+            </div>
+          ))}
+        </div>
       </div>
       <div className="chatPage__rightSection">
         <div className="chatPage__rightSection__top hide">
@@ -936,7 +958,7 @@ function ChatPage() {
           </div>
           <div>
             {currentChatWindow?.includes("group") ? (
-              <button>Show Members</button>
+              <button onClick={showGroupMembers}>Show Members</button>
             ) : (
               ""
             )}

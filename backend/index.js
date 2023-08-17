@@ -552,3 +552,23 @@ app.get("/check-user-online/:roomID/:userEmail", (req, res) => {
       console.log(err);
     });
 });
+
+app.get("/group-members-list/:roomID", (req, res) => {
+  console.log(req.params.roomID);
+  db.collection("chat-spider-chats")
+    .findOne(
+      {
+        roomID: req.params.roomID,
+      },
+      {
+        projection: {
+          _id: 0,
+          participants: 1,
+        },
+      }
+    )
+    .then((doc) => {
+      res.status(200).json(doc.participants);
+    })
+    .catch((err) => console.log(err));
+});
