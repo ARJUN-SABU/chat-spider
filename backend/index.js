@@ -69,9 +69,15 @@ io.on("connection", (socket) => {
     console.log(messageBlock);
 
     //send to the room.
-    socket.to(messageBlock.roomID).emit("recieve-new-message", messageBlock);
+    socket.to(messageBlock.roomID).emit("recieve-new-message", {
+      senderName: messageBlock.senderName,
+      senderEmail: messageBlock.senderEmail,
+      content: messageBlock.content,
+      dateTime: new Date().toUTCString(),
+      roomID: messageBlock.roomID,
+    });
 
-    //send to the database
+    // send to the database
     // db.collection("chat-spider-chats")
     //   .updateOne(
     //     {
@@ -86,6 +92,7 @@ io.on("connection", (socket) => {
     //               senderName: messageBlock.senderName,
     //               senderEmail: messageBlock.senderEmail,
     //               content: messageBlock.content,
+    //               dateTime: new Date().toUTCString(),
     //             },
     //           ],
     //         },
@@ -571,4 +578,25 @@ app.get("/group-members-list/:roomID", (req, res) => {
       res.status(200).json(doc.participants);
     })
     .catch((err) => console.log(err));
+});
+
+app.post("/update-user-chatList", (req, res) => {
+  db.collection("chat-spider-users")
+    .updateOne(
+      {
+        userEmail: req.body.userEmail,
+      },
+      {
+        $set: {
+          userChats: req.body.userChats,
+        },
+      }
+    )
+    .then((doc) => {
+      console.log(doc);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  console.log(req.body);
 });

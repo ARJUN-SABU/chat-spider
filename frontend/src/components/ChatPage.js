@@ -116,6 +116,26 @@ function ChatPage() {
       .catch((err) => console.log(err));
   }, []);
 
+  useEffect(() => {
+    if (userChatList.length !== 0) {
+      fetch("http://localhost:8000/update-user-chatList", {
+        method: "post",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({
+          userEmail: currentUser.email,
+          userChats: userChatList,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+        })
+        .catch((err) => console.log(err));
+    }
+  }, [userChatList]);
+
   // ------------------------------- socket events -------------------------------
   socket.on("new-singleChat-start-message", (message) => {
     console.log("This is the new message -> ", message);
@@ -192,17 +212,18 @@ function ChatPage() {
     ]);
   });
 
-  socket.on("new-user-joined", (message) => {
-    console.log(message);
-    setUserChatList((previous) => {
-      let idx = previous.findIndex(
-        (userChat) => userChat.roomID === message.roomID
-      );
-      let removedChat = previous.splice(idx, 1);
-      console.log(removedChat);
-      return [removedChat[0], ...previous];
-    });
-  });
+  // socket.on("new-user-joined", (message) => {
+  //   console.log(message);
+  //   setUserChatList((previous) => {
+  //     let idx = previous.findIndex(
+  //       (userChat) => userChat.roomID === message.roomID
+  //     );
+  //     let removedChat = previous.splice(idx, 1);
+  //     console.log(removedChat);
+  //     return [removedChat[0], ...previous];
+  //   });
+
+  // });
 
   socket.on("recieve-new-message", (message) => {
     console.log(message);
@@ -230,6 +251,7 @@ function ChatPage() {
               senderName: message.senderName,
               senderEmail: message.senderEmail,
               content: message.content,
+              dateTime: message.dateTime,
             },
           ],
           message.roomID
@@ -242,6 +264,7 @@ function ChatPage() {
           senderName: message.senderName,
           senderEmail: message.senderEmail,
           content: message.content,
+          dateTime: message.dateTime,
         });
       }
 
@@ -294,9 +317,13 @@ function ChatPage() {
       senderName.innerText = message.senderName;
       let messageContent = document.createElement("p");
       messageContent.innerText = message.content;
+      let dateTime = document.createElement("p");
+      console.log("I am the message --> ", message);
+      dateTime.innerText = new Date(message.dateTime);
 
       messageBlock.append(senderName);
       messageBlock.append(messageContent);
+      messageBlock.append(dateTime);
 
       // console.log(messageBlock);
       chatWindow.append(messageBlock);
@@ -311,8 +338,11 @@ function ChatPage() {
       senderName.innerText = message.senderName;
       let messageContent = document.createElement("p");
       messageContent.innerText = message.content;
+      let dateTime = document.createElement("p");
+      dateTime.innerText = new Date(message.dateTime);
       messageBlock.append(senderName);
       messageBlock.append(messageContent);
+      messageBlock.append(dateTime);
       chatWindow.insertBefore(messageBlock, chatWindow.children[0]);
     });
   }

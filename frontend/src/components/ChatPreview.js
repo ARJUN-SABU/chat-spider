@@ -19,7 +19,6 @@ function ChatPreview({
         <p>{chatPreviewMessage}</p>
       </div>
       <div className="chatPreview__right">
-        <p>10:03</p>
         <p>{unReadCount === 0 ? "" : unReadCount}</p>
       </div>
     </div>
