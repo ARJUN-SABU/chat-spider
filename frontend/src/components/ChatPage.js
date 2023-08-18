@@ -149,7 +149,6 @@ function ChatPage() {
         },
         ...previous,
       ];
-      // updateUserChatList(newChatList);
 
       return newChatList;
     });
@@ -208,9 +207,6 @@ function ChatPage() {
         },
         ...previous,
       ];
-
-      // updateUserChatList(newChatList);
-
       return newChatList;
     });
   });
@@ -240,8 +236,6 @@ function ChatPage() {
       let removedChat = previous.splice(idx, 1)[0];
 
       let newChatList = [removedChat, ...previous];
-
-      // updateUserChatList(newChatList);
 
       return newChatList;
     });
@@ -315,41 +309,44 @@ function ChatPage() {
 
   //------------------------------- utitlity functions -------------------------------
 
-  function updateUserChatList(chatList) {
-    fetch("http://localhost:8000/update-user-chatList", {
-      method: "post",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify({
-        userEmail: currentUser.email,
-        userChats: chatList,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((err) => console.log(err));
-  }
-
   function displayMessages(messages, chatRoomID) {
     // console.log(messages);
 
     messages.forEach((message) => {
       let chatWindow = document.querySelector(`#chatWindow-${chatRoomID}`);
       let messageBlock = document.createElement("div");
+      messageBlock.classList.add("chatMessage");
+
       let senderName = document.createElement("p");
       senderName.innerText = message.senderName;
+      senderName.classList.add("chatMessage__senderName");
+
       let messageContent = document.createElement("p");
       messageContent.innerText = message.content;
+      messageContent.classList.add("chatMessage__content");
+
       let dateTime = document.createElement("p");
-      console.log("I am the message --> ", message);
-      dateTime.innerText = new Date(message.dateTime);
+      dateTime.innerText = String(new Date(message.dateTime))?.split("GMT")[0];
+      dateTime.classList.add("chatMessage__dateTime");
+
+      let messageTriangle = document.createElement("div");
+
+      setCurrentUser((previous) => {
+        if (message.senderEmail === previous.email) {
+          messageBlock.classList.add("currentUserMessage");
+          messageTriangle.classList.add("messageTriangleRight");
+        } else {
+          messageBlock.classList.add("otherUserMessage");
+          messageTriangle.classList.add("messageTriangleLeft");
+        }
+
+        return previous;
+      });
 
       messageBlock.append(senderName);
       messageBlock.append(messageContent);
       messageBlock.append(dateTime);
+      messageBlock.append(messageTriangle);
 
       // console.log(messageBlock);
       chatWindow.append(messageBlock);
@@ -360,15 +357,35 @@ function ChatPage() {
     let chatWindow = document.querySelector(`#chatWindow-${roomID}`);
     messages.forEach((message) => {
       let messageBlock = document.createElement("div");
+      messageBlock.classList.add("chatMessage");
+
       let senderName = document.createElement("p");
       senderName.innerText = message.senderName;
+      senderName.classList.add("chatMessage__senderName");
+
       let messageContent = document.createElement("p");
       messageContent.innerText = message.content;
+      messageContent.classList.add("chatMessage__content");
+
       let dateTime = document.createElement("p");
-      dateTime.innerText = new Date(message.dateTime);
+      dateTime.innerText = String(new Date(message.dateTime))?.split("GMT")[0];
+      dateTime.classList.add("chatMessage__dateTime");
+
+      let messageTriangle = document.createElement("div");
+
+      if (message.senderEmail === currentUser.email) {
+        messageBlock.classList.add("currentUserMessage");
+        messageTriangle.classList.add("messageTriangleRight");
+      } else {
+        messageBlock.classList.add("otherUserMessage");
+        messageTriangle.classList.add("messageTriangleLeft");
+      }
+
       messageBlock.append(senderName);
       messageBlock.append(messageContent);
       messageBlock.append(dateTime);
+      messageBlock.append(messageTriangle);
+
       chatWindow.insertBefore(messageBlock, chatWindow.children[0]);
     });
   }
@@ -570,8 +587,6 @@ function ChatPage() {
             ...previous,
           ];
 
-          // updateUserChatList(newChatList);
-
           return newChatList;
         });
 
@@ -657,7 +672,6 @@ function ChatPage() {
               },
               ...previous,
             ];
-            // updateUserChatList(newChatList);
 
             return newChatList;
           });
@@ -747,7 +761,6 @@ function ChatPage() {
             ...previous,
           ];
 
-          // updateUserChatList(newChatList);
           return newChatList;
         });
 
@@ -856,6 +869,7 @@ function ChatPage() {
       .querySelector(`#chatPreview-${currentChatWindow}`)
       .classList.remove("chatPreview--selected");
 
+    handleLeftPanel("chatPage__leftSection__bottom--chatsPanel");
     setCurrentChatWindow(null);
   }
 
@@ -1034,9 +1048,13 @@ function ChatPage() {
 
         <div className="chatPage__leftSection__bottom chatPage__leftSection__bottom--showGroupMembersPanel hide">
           {currentChatGroupMembers.map((groupMember) => (
-            <div>
-              <p>{groupMember.name}</p>
-              <p>{groupMember.email}</p>
+            <div className="chatPage__leftSection__bottom--showGroupMembersPanel__memberInfo">
+              <p className="chatPage__leftSection__bottom--showGroupMembersPanel__memberInfo__name">
+                {groupMember.name}
+              </p>
+              <p className="chatPage__leftSection__bottom--showGroupMembersPanel__memberInfo__email">
+                {groupMember.email}
+              </p>
             </div>
           ))}
         </div>
@@ -1130,10 +1148,7 @@ function ChatPage() {
               className="chatPage__rightSection__middle__liveChatWindow hide"
               id={`chatWindow-${userChat.roomID}`}
               onScroll={() => handleChatWindowScrolling(userChat.roomID)}
-            >
-              <p>{userChat.participantName || userChat.groupName}</p>
-              <p>RoomID: {currentChatWindow}</p>
-            </div>
+            ></div>
           ))}
         </div>
         <div className="chatPage__rightSection__bottom hide">
