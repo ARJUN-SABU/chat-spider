@@ -296,6 +296,9 @@
   display: none;
 }
 
+.chatPreview--selected {
+  background-color: #3098ff;
+}
 .selected {
   background-color: #30ffb282;
 }

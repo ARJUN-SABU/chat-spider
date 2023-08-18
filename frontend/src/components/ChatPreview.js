@@ -11,6 +11,7 @@ function ChatPreview({
   return (
     <div
       className="chatPreview"
+      id={`chatPreview-${roomID}`}
       onClick={() => handleOnClickFunction(roomID, chatPreviewName)}
     >
       <div className="chatPreview__left">

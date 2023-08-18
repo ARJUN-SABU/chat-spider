@@ -117,8 +117,6 @@ function ChatPage() {
   }, []);
 
   useEffect(() => {
-    console.log(userChatList);
-
     if (userChatList.length !== 0) {
       socket.emit("update-user-chat-list", {
         userEmail: currentUser.email,
@@ -398,10 +396,16 @@ function ChatPage() {
       document
         .querySelector(`#chatWindow-${currentChatWindow}`)
         ?.classList.add("hide");
+      document
+        .querySelector(`#chatPreview-${currentChatWindow}`)
+        .classList.remove("chatPreview--selected");
     }
     document
       .querySelector(`#chatWindow-${chatRoomID}`)
       ?.classList.remove("hide");
+    document
+      .querySelector(`#chatPreview-${chatRoomID}`)
+      .classList.add("chatPreview--selected");
 
     document
       .querySelector(".chatPage__rightSection__bottom")
@@ -840,7 +844,7 @@ function ChatPage() {
       .querySelector(`#chatWindow-${currentChatWindow}`)
       .classList.add("hide");
     document.querySelector("#noWindowSelectedScreen").classList.remove("hide");
-    setCurrentChatWindow(null);
+
     document
       .querySelector(".chatPage__rightSection__bottom")
       .classList.add("hide");
@@ -848,6 +852,11 @@ function ChatPage() {
     document
       .querySelector(".chatPage__rightSection__top")
       .classList.add("hide");
+    document
+      .querySelector(`#chatPreview-${currentChatWindow}`)
+      .classList.remove("chatPreview--selected");
+
+    setCurrentChatWindow(null);
   }
 
   function showGroupMembers() {
