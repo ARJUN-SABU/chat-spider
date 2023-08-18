@@ -82,7 +82,7 @@ function ChatPage() {
               setRoomPreviewMessageMap((previousMap) => {
                 previousMap.set(
                   userChat.roomID,
-                  data.message.substring(0, 30) + "..."
+                  data.message.substring(0, 10) + "..."
                 );
 
                 return new Map(previousMap);
@@ -116,25 +116,16 @@ function ChatPage() {
       .catch((err) => console.log(err));
   }, []);
 
-  // useEffect(() => {
-  //   if (userChatList.length !== 0) {
-  //     fetch("http://localhost:8000/update-user-chatList", {
-  //       method: "post",
-  //       headers: {
-  //         "Content-type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         userEmail: currentUser.email,
-  //         userChats: userChatList,
-  //       }),
-  //     })
-  //       .then((res) => res.json())
-  //       .then((data) => {
-  //         console.log(data);
-  //       })
-  //       .catch((err) => console.log(err));
-  //   }
-  // }, [userChatList]);
+  useEffect(() => {
+    console.log(userChatList);
+
+    if (userChatList.length !== 0) {
+      socket.emit("update-user-chat-list", {
+        userEmail: currentUser.email,
+        userChats: userChatList,
+      });
+    }
+  }, [userChatList]);
 
   // ------------------------------- socket events -------------------------------
   socket.on("new-singleChat-start-message", (message) => {

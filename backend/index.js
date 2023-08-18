@@ -114,6 +114,28 @@ io.on("connection", (socket) => {
     socket.to(typingBlock.roomID).emit("recieve-typing-signal", typingBlock);
   });
 
+  socket.on("update-user-chat-list", (userChatListBlock) => {
+    console.log(userChatListBlock);
+
+    db.collection("chat-spider-users")
+      .updateOne(
+        {
+          userEmail: userChatListBlock.userEmail,
+        },
+        {
+          $set: {
+            userChats: userChatListBlock.userChats,
+          },
+        }
+      )
+      .then((doc) => {
+        console.log(doc);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  });
+
   socket.on("disconnect", () => {
     // delete usersConnectedToServer[]
 
@@ -139,7 +161,7 @@ io.on("connection", (socket) => {
       )
       .then((doc) => {
         console.log(doc);
-        doc.userChats.forEach((userChat) => {
+        doc?.userChats.forEach((userChat) => {
           if (userChat.type === "singleChat") {
             socket.to(userChat.roomID).emit("offline-signal", userChat.roomID);
           }
@@ -578,25 +600,4 @@ app.get("/group-members-list/:roomID", (req, res) => {
       res.status(200).json(doc.participants);
     })
     .catch((err) => console.log(err));
-});
-
-app.post("/update-user-chatList", (req, res) => {
-  db.collection("chat-spider-users")
-    .updateOne(
-      {
-        userEmail: req.body.userEmail,
-      },
-      {
-        $set: {
-          userChats: req.body.userChats,
-        },
-      }
-    )
-    .then((doc) => {
-      console.log(doc);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-  console.log(req.body);
 });
