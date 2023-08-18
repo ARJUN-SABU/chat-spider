@@ -10,7 +10,6 @@
   height: 100vh;
   background-color: #0e7aef;
   color: #f1f3f4;
-  /* border-right: 3px solid black; */
   display: flex;
   flex-direction: column;
 }
@@ -332,7 +331,7 @@
   padding: 15px 15px;
   width: max-content;
   margin: 40px 0;
-  max-width: 550px;
+  max-width: 400px;
   overflow-wrap: break-word;
   position: relative;
 }
@@ -434,4 +433,24 @@
 }
 .selected {
   background-color: #30ffb282;
+}
+
+/* ---------------------------------------- responsiveness settings ---------------------------------------- */
+@media (max-width: 832px) {
+  .chatPage__leftSection {
+    width: 250px;
+  }
+}
+@media (max-width: 683px) {
+  .chatPage__leftSection {
+    width: 100%;
+  }
+  .chatMessage {
+    max-width: 300px;
+  }
+}
+@media (max-width: 400px) {
+  .chatMessage {
+    max-width: 200px;
+  }
 }

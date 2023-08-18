@@ -26,3 +26,10 @@
   width: 23px;
   border-radius: 100%;
 }
+
+/* ---------------------------------------- responsiveness settings ---------------------------------------- */
+@media (max-width: 832px) {
+  .chatPreview {
+    padding: 15px 20px 15px 20px;
+  }
+}

@@ -125,6 +125,12 @@ function ChatPage() {
     }
   }, [userChatList]);
 
+  useEffect(() => {
+    if (window.innerWidth <= 683) {
+      document.querySelector(".chatPage__rightSection").classList.add("hide");
+    }
+  }, []);
+
   // ------------------------------- socket events -------------------------------
   socket.on("new-singleChat-start-message", (message) => {
     console.log("This is the new message -> ", message);
@@ -431,6 +437,13 @@ function ChatPage() {
     document
       .querySelector(".chatPage__rightSection__top")
       .classList.remove("hide");
+
+    if (window.innerWidth <= 683) {
+      document
+        .querySelector(".chatPage__rightSection")
+        .classList.remove("hide");
+      document.querySelector(".chatPage__leftSection").classList.add("hide");
+    }
 
     //logic for setting online or offline
     let singleChatMessage = userChatList.filter(
@@ -871,6 +884,11 @@ function ChatPage() {
 
     handleLeftPanel("chatPage__leftSection__bottom--chatsPanel");
     setCurrentChatWindow(null);
+
+    if (window.innerWidth <= 683) {
+      document.querySelector(".chatPage__rightSection").classList.add("hide");
+      document.querySelector(".chatPage__leftSection").classList.remove("hide");
+    }
   }
 
   function showGroupMembers() {
