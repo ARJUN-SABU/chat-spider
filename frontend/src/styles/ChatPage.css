@@ -271,9 +271,15 @@
   justify-content: space-between;
   box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.2);
 }
+.chatPage__rightSection__top__chatInfo {
+  display: flex;
+  align-items: center;
+}
 
+.chatPage__rightSection__top__chatInfo span {
+  margin-right: 15px;
+}
 .chatPage__rightSection__top__chatInfo p {
-  margin-top: 3px;
   font-size: 14px;
 }
 
@@ -433,6 +439,22 @@
 }
 .selected {
   background-color: #30ffb282;
+}
+
+.online--symbol {
+  width: 10px;
+  height: 10px;
+  border-radius: 100%;
+  background-color: green;
+  margin-right: 6px;
+}
+
+.offline--symbol {
+  width: 10px;
+  height: 10px;
+  border-radius: 100%;
+  background-color: red;
+  margin-right: 6px;
 }
 
 /* ---------------------------------------- responsiveness settings ---------------------------------------- */

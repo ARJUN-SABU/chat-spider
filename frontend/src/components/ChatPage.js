@@ -9,7 +9,7 @@ import ChatPreview from "./ChatPreview";
 import SingleMessageBlock from "./SingleMessageBlock";
 
 //icons
-import { IoSend, IoCloseCircle, IoAppsSharp } from "react-icons/io5";
+import { IoSend, IoAppsSharp, IoArrowBack } from "react-icons/io5";
 
 //styles
 import "../styles/ChatPage.css";
@@ -437,6 +437,9 @@ function ChatPage() {
     document
       .querySelector(".chatPage__rightSection__top")
       .classList.remove("hide");
+
+    document.querySelector(".chatPage__rightSection__bottom__inputArea").value =
+      "";
 
     if (window.innerWidth <= 683) {
       document
@@ -1080,22 +1083,60 @@ function ChatPage() {
       <div className="chatPage__rightSection">
         <div className="chatPage__rightSection__top hide">
           <div className="chatPage__rightSection__top__chatInfo">
-            <h2>{chatWindowName}</h2>
-            {currentChatWindow?.includes("group") ? (
-              userIsTyping === "" ? (
-                ""
-              ) : (
-                <p>{userIsTyping}</p>
-              )
+            {window.innerWidth <= 683 ? (
+              <span
+                onClick={() => {
+                  closeCurrentChatWindow();
+
+                  document
+                    .querySelector(".chatPage__rightSection__top__chatOptions")
+                    .classList.add("hide");
+                }}
+              >
+                <IoArrowBack size={25} />
+              </span>
             ) : (
-              <p>
-                {userIsTyping !== ""
-                  ? userIsTyping
-                  : userIsOnline
-                  ? "online"
-                  : "offline"}
-              </p>
+              ""
             )}
+            <div>
+              <h2>{chatWindowName}</h2>
+              {currentChatWindow?.includes("group") ? (
+                userIsTyping === "" ? (
+                  ""
+                ) : (
+                  <p>{userIsTyping}</p>
+                )
+              ) : (
+                <p
+                  style={{
+                    marginTop: "3px",
+                  }}
+                >
+                  {userIsTyping !== "" ? (
+                    userIsTyping
+                  ) : userIsOnline ? (
+                    <p
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <p className="online--symbol"></p>
+                      <p>online</p>
+                    </p>
+                  ) : (
+                    <p
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <p className="offline--symbol"></p>offline
+                    </p>
+                  )}
+                </p>
+              )}
+            </div>
           </div>
           <button
             className="chatPage__rightSection__top__chatOptionsToggler"
