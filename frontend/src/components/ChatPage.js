@@ -82,7 +82,7 @@ function ChatPage() {
               setRoomPreviewMessageMap((previousMap) => {
                 previousMap.set(
                   userChat.roomID,
-                  data.message.substring(0, 10) + "..."
+                  data.message.substring(0, 20) + "..."
                 );
 
                 return new Map(previousMap);
@@ -134,7 +134,10 @@ function ChatPage() {
     displayedMessageCountMap.set(message.roomID, 0);
     fetchedAllMessagesMap.set(message.roomID, false);
     setRoomPreviewMessageMap((previousMap) => {
-      previousMap.set(message.roomID, message.messageContent);
+      previousMap.set(
+        message.roomID,
+        `${message.messageContent.substring(0, 20)}...`
+      );
       return new Map(previousMap);
     });
 
@@ -246,7 +249,7 @@ function ChatPage() {
     });
 
     setRoomPreviewMessageMap((previousMap) => {
-      previousMap.set(message.roomID, message.content);
+      previousMap.set(message.roomID, `${message.content.substring(0, 20)}...`);
       return new Map(previousMap);
     });
 
@@ -483,8 +486,8 @@ function ChatPage() {
     //So, first we reduce the height to 20px and then if the text's height > textarea's height
     //then scrolling would happen. So the next line then sets the scroll height
     //as the text area height.
-    event.target.style.height = "20px";
-    event.target.style.height = event.target.scrollHeight + "px";
+    event.target.style.height = "10px";
+    event.target.style.height = event.target.scrollHeight - 20 + "px";
 
     if (chatInputType === "oldChatInput" && event.target.value === "") {
       sendTypingSignal("");
@@ -679,7 +682,7 @@ function ChatPage() {
               roomID,
               newSingleChatMessage.current.value === ""
                 ? "Hi!"
-                : newSingleChatMessage.current.value
+                : `${newSingleChatMessage.current.value.substring(0, 20)}...`
             );
             return new Map(previousMap);
           });
@@ -757,7 +760,10 @@ function ChatPage() {
           .then((data) => {
             console.log(data);
             setRoomPreviewMessageMap((previousMap) => {
-              previousMap.set(groupRoomIDToJoin.current.value, data.message);
+              previousMap.set(
+                groupRoomIDToJoin.current.value,
+                `${data.message.substring(0, 20)}...`
+              );
               return new Map(previousMap);
             });
           })
@@ -930,7 +936,7 @@ function ChatPage() {
               )
             }
           >
-            Start a new conversation
+            New Conversation
           </p>
           <p
             onClick={() =>
@@ -939,7 +945,7 @@ function ChatPage() {
               )
             }
           >
-            Join a group
+            Join Group
           </p>
           <p
             onClick={() => {
@@ -948,12 +954,11 @@ function ChatPage() {
               );
             }}
           >
-            Create a new group
+            Create Group
           </p>
-          <p>Logout</p>
         </div>
         <div className="chatPage__leftSection__bottom chatPage__leftSection__bottom--newSingleChatPanel hide">
-          <p>Start a new conversation</p>
+          <p>New Conversation</p>
 
           <input
             placeholder="Enter email"
@@ -964,10 +969,6 @@ function ChatPage() {
             placeholder="Say Hi!"
             ref={newSingleChatMessage}
             onChange={(event) => autoGrowInputArea(event, "newChatInput")}
-            style={{
-              resize: "none",
-              maxHeight: "100px",
-            }}
           />
           <button onClick={handleNewSingleChat}>Send</button>
         </div>
