@@ -23,7 +23,8 @@
 }
 .chatPage__leftSection__top {
   height: max-content;
-  padding: 30px 40px 30px 20px;
+  padding: 30px 20px 30px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .chatPage__leftSection__top__userDetails h2 {
@@ -43,7 +44,7 @@
   padding: 10px 8px;
   background-color: #f1f3f4;
   color: #0e7aef;
-  border-radius: 20px;
+  border-radius: 8px;
   font-weight: 600;
 }
 .chatPage__leftSection__top__optionsSection__closeOptions {
@@ -55,7 +56,7 @@
   padding: 10px 8px;
   background-color: #f1f3f4;
   color: #0e7aef;
-  border-radius: 20px;
+  border-radius: 8px;
   margin-top: 15px;
 }
 
@@ -69,39 +70,181 @@
   padding: 20px 40px 20px 30px;
   cursor: pointer;
   font-size: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
 }
 .chatPage__leftSection__bottom--MenuPanel p:hover {
   background-color: #3098ff;
 }
 .chatPage__leftSection__bottom--newSingleChatPanel {
-  padding: 0px 70px 20px 30px;
+  padding: 20px 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .chatPage__leftSection__bottom--newSingleChatPanel p {
   font-size: 18px;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .chatPage__leftSection__bottom--newSingleChatPanel input {
   border: none;
   outline: none;
-  padding: 10px 10px;
-  width: 100%;
-  margin-bottom: 10px;
+  padding: 10px 0px 10px 14px;
+  margin-bottom: 15px;
   font-family: sans-serif;
+  background-color: #3098ff;
+  color: white;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.chatPage__leftSection__bottom--newSingleChatPanel input::placeholder {
+  color: #f1f3f4;
+}
+.chatPage__leftSection__bottom--newSingleChatPanel input:focus {
+  outline: 1px solid white;
 }
 
 .chatPage__leftSection__bottom--newSingleChatPanel textarea {
   border: none;
   outline: none;
-  padding: 10px 10px;
-  width: 100%;
-  margin-bottom: 10px;
+  padding: 10px 0px 9px 14px;
+  margin-bottom: 15px;
   resize: none;
   min-height: 20px;
   max-height: 100px;
   height: 20px;
   font-family: sans-serif;
+  background-color: #3098ff;
+  color: white;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.chatPage__leftSection__bottom--newSingleChatPanel textarea::placeholder {
+  color: #f1f3f4;
+}
+.chatPage__leftSection__bottom--newSingleChatPanel textarea:focus {
+  outline: 1px solid white;
+}
+
+.chatPage__leftSection__bottom--newSingleChatPanel button {
+  border: none;
+  outline: none;
+  padding: 10px;
+  width: 100%;
+  background-color: #f1f3f4;
+  color: #0e7aef;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chatPage__leftSection__bottom--joinNewGroupPanel {
+  padding: 20px 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatPage__leftSection__bottom--joinNewGroupPanel p {
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+.chatPage__leftSection__bottom--joinNewGroupPanel input {
+  border: none;
+  outline: none;
+  padding: 10px 0px 10px 14px;
+  margin-bottom: 15px;
+  font-family: sans-serif;
+  background-color: #3098ff;
+  color: white;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.chatPage__leftSection__bottom--joinNewGroupPanel input::placeholder {
+  color: #f1f3f4;
+}
+.chatPage__leftSection__bottom--joinNewGroupPanel input:focus {
+  outline: 1px solid white;
+}
+
+.chatPage__leftSection__bottom--joinNewGroupPanel button {
+  border: none;
+  outline: none;
+  padding: 10px;
+  width: 100%;
+  background-color: #f1f3f4;
+  color: #0e7aef;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chatPage__leftSection__bottom--createNewGroupPanel {
+  /* padding: 20px 20px 20px 20px; */
+  display: flex;
+  flex-direction: column;
+}
+
+.chatPage__leftSection__bottom--createNewGroupPanel__heading {
+  font-size: 18px;
+  margin: 20px 20px 15px;
+}
+
+.chatPage__leftSection__bottom--createNewGroupPanel input {
+  border: none;
+  outline: none;
+  padding: 10px 0px 10px 14px;
+  margin: 0px 20px;
+  font-family: sans-serif;
+  background-color: #3098ff;
+  color: white;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.chatPage__leftSection__bottom--createNewGroupPanel input::placeholder {
+  color: #f1f3f4;
+}
+.chatPage__leftSection__bottom--createNewGroupPanel input:focus {
+  outline: 1px solid white;
+}
+
+.chatPage__leftSection__bottom--createNewGroupPanel__heading2 {
+  font-size: 15px;
+  padding: 15px 25px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.chatPage__leftSection__bottom__groupSelectionUser {
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 15px 20px;
+}
+
+.chatPage__leftSection__bottom__groupSelectionUser:hover {
+  background-color: #3098ff;
+}
+
+.chatPage__leftSection__bottom--createNewGroupPanel button {
+  border: none;
+  outline: none;
+  padding: 10px;
+  /* width: 100%; */
+  background-color: #f1f3f4;
+  color: #0e7aef;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 20px;
+}
+.chatPage__leftSection__bottom__groupSelectionUser__name {
+  font-weight: 700;
+}
+.chatPage__leftSection__bottom__groupSelectionUser__email {
+  font-size: 14px;
 }
 
 .chatPage__rightSection__top {
@@ -148,15 +291,11 @@
   justify-content: center;
   cursor: pointer;
 }
-.chatPage__leftSection__bottom__groupSelectionUser {
-  cursor: pointer;
-  border: 1px solid black;
-}
 
 .hide {
   display: none;
 }
 
 .selected {
-  background-color: aqua;
+  background-color: #30ffb282;
 }

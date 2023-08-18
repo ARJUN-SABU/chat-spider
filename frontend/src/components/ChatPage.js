@@ -961,19 +961,19 @@ function ChatPage() {
           <p>New Conversation</p>
 
           <input
-            placeholder="Enter email"
+            placeholder="Enter Email"
             type="email"
             ref={newSingleChatUserEmail}
           />
           <textarea
-            placeholder="Say Hi!"
+            placeholder="Say Hi"
             ref={newSingleChatMessage}
             onChange={(event) => autoGrowInputArea(event, "newChatInput")}
           />
           <button onClick={handleNewSingleChat}>Send</button>
         </div>
         <div className="chatPage__leftSection__bottom chatPage__leftSection__bottom--joinNewGroupPanel hide">
-          <p>Join a group</p>
+          <p>Join Group</p>
           <input
             type="text"
             placeholder="Enter the group id"
@@ -982,9 +982,13 @@ function ChatPage() {
           <button onClick={handleGroupJoining}>Join</button>
         </div>
         <div className="chatPage__leftSection__bottom chatPage__leftSection__bottom--createNewGroupPanel hide">
-          <p>Create a new group</p>
+          <p className="chatPage__leftSection__bottom--createNewGroupPanel__heading">
+            Create Group
+          </p>
           <input placeholder="Enter group name" ref={newGroupName} />
-          <p>Select the group participants</p>
+          <p className="chatPage__leftSection__bottom--createNewGroupPanel__heading2">
+            Select Members
+          </p>
           <div>
             {uniqueContacts.map((contact, index) => (
               <div
