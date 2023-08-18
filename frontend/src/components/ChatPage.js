@@ -1160,13 +1160,14 @@ function ChatPage() {
               sendTypingSignal(`${currentUser.name} is typing...`)
             }
             ref={newMessage}
+            placeholder="Type your message here..."
           />
 
           <button
             className="chatPage__rightSection__bottom__sendMessage"
             onClick={sendMessage}
           >
-            <IoSend />
+            <IoSend size={18} />
           </button>
         </div>
       </div>

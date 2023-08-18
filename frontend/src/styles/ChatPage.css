@@ -321,13 +321,6 @@
   overflow-y: hidden;
 }
 
-.chatPage__rightSection__bottom {
-  display: flex;
-  align-items: center;
-  background-color: yellow;
-  padding: 10px 0;
-}
-
 .chatPage__rightSection__middle__liveChatWindow {
   overflow-y: scroll;
   flex: 1;
@@ -398,14 +391,27 @@
   right: -10px;
 }
 
+.chatPage__rightSection__bottom {
+  display: flex;
+  align-items: center;
+  background-color: #dbdbdb;
+  padding: 10px 0;
+  box-shadow: 0px -1px 10px 0px rgba(0, 0, 0, 0.1);
+}
+
 .chatPage__rightSection__bottom__inputArea {
   flex: 1;
-  height: 20px;
-  padding: 10px 10px;
+  height: 30px;
+  padding: 10px 20px;
   resize: none;
+  border: none;
   outline: none;
-  min-height: 20px;
+  min-height: 30px;
   max-height: 100px;
+  background-color: #dbdbdb;
+  font-family: sans-serif;
+  font-size: 16px;
+  color: #111111;
 }
 
 .chatPage__rightSection__bottom__sendMessage {
@@ -416,6 +422,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  margin-right: 10px;
 }
 
 .hide {
