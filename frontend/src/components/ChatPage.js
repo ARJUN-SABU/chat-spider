@@ -9,7 +9,7 @@ import ChatPreview from "./ChatPreview";
 import SingleMessageBlock from "./SingleMessageBlock";
 
 //icons
-import { IoSend, IoCloseCircle } from "react-icons/io5";
+import { IoSend, IoCloseCircle, IoAppsSharp } from "react-icons/io5";
 
 //styles
 import "../styles/ChatPage.css";
@@ -871,6 +871,20 @@ function ChatPage() {
     handleLeftPanel("chatPage__leftSection__bottom--showGroupMembersPanel");
   }
 
+  function copyUserEmail() {
+    fetch(`http://localhost:8000/get-user-email/${currentChatWindow}`)
+      .then((res) => res.json())
+      .then((doc) => {
+        navigator.clipboard.writeText(
+          doc.members.filter((member) => member != currentUser.email)[0]
+        );
+        document
+          .querySelector(".chatPage__rightSection__top__chatOptions")
+          .classList.toggle("hide");
+      })
+      .catch((err) => console.log(err));
+  }
+
   return (
     <div className="chatPage">
       <div className="chatPage__leftSection">
@@ -985,7 +999,7 @@ function ChatPage() {
           <p>Join Group</p>
           <input
             type="text"
-            placeholder="Enter the group id"
+            placeholder="Enter Group ID"
             ref={groupRoomIDToJoin}
           />
           <button onClick={handleGroupJoining}>Join</button>
@@ -994,7 +1008,7 @@ function ChatPage() {
           <p className="chatPage__leftSection__bottom--createNewGroupPanel__heading">
             Create Group
           </p>
-          <input placeholder="Enter group name" ref={newGroupName} />
+          <input placeholder="Enter Group Name" ref={newGroupName} />
           <p className="chatPage__leftSection__bottom--createNewGroupPanel__heading2">
             Select Members
           </p>
@@ -1029,18 +1043,15 @@ function ChatPage() {
       </div>
       <div className="chatPage__rightSection">
         <div className="chatPage__rightSection__top hide">
-          <div>
-            <h4>{chatWindowName}</h4>
+          <div className="chatPage__rightSection__top__chatInfo">
+            <h2>{chatWindowName}</h2>
             {currentChatWindow?.includes("group") ? (
-              <div>
-                <p>RoomID: {currentChatWindow}</p>
+              userIsTyping === "" ? (
+                ""
+              ) : (
                 <p>{userIsTyping}</p>
-              </div>
+              )
             ) : (
-              ""
-            )}
-
-            {currentChatWindow?.includes("single") ? (
               <p>
                 {userIsTyping !== ""
                   ? userIsTyping
@@ -1048,22 +1059,61 @@ function ChatPage() {
                   ? "online"
                   : "offline"}
               </p>
-            ) : (
-              ""
             )}
           </div>
-          <div>
+          <button
+            className="chatPage__rightSection__top__chatOptionsToggler"
+            onClick={() => {
+              document
+                .querySelector(".chatPage__rightSection__top__chatOptions")
+                .classList.toggle("hide");
+            }}
+          >
+            <IoAppsSharp size={23} />
+          </button>
+          <div className="chatPage__rightSection__top__chatOptions hide">
             {currentChatWindow?.includes("group") ? (
-              <button onClick={showGroupMembers}>Show Members</button>
+              <>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(currentChatWindow);
+                    document
+                      .querySelector(
+                        ".chatPage__rightSection__top__chatOptions"
+                      )
+                      .classList.toggle("hide");
+                  }}
+                >
+                  Copy Group ID
+                </button>
+                <button
+                  onClick={() => {
+                    showGroupMembers();
+                    document
+                      .querySelector(
+                        ".chatPage__rightSection__top__chatOptions"
+                      )
+                      .classList.toggle("hide");
+                  }}
+                >
+                  Show Members
+                </button>
+              </>
             ) : (
-              ""
+              <button onClick={copyUserEmail}>Copy User Email</button>
             )}
 
-            <button onClick={closeCurrentChatWindow}>Close Chat</button>
-            {/* options/menu symbol
-             for viewing the group members if it is a group chat*/}
-            {/* as well as option to show and copy the group id. */}
-            {/* Option to close the chat */}
+            <button
+              onClick={() => {
+                closeCurrentChatWindow();
+
+                document
+                  .querySelector(".chatPage__rightSection__top__chatOptions")
+                  .classList.toggle("hide");
+              }}
+            >
+              Close Chat
+            </button>
           </div>
         </div>
         <div className="chatPage__rightSection__middle">

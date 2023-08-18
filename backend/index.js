@@ -601,3 +601,24 @@ app.get("/group-members-list/:roomID", (req, res) => {
     })
     .catch((err) => console.log(err));
 });
+
+app.get("/get-user-email/:roomID", (req, res) => {
+  db.collection("chat-spider-chats")
+    .findOne(
+      {
+        roomID: req.params.roomID,
+      },
+      {
+        projection: {
+          _id: 0,
+          participants: 1,
+        },
+      }
+    )
+    .then((doc) => {
+      res.status(200).json({
+        members: doc.participants.map((participant) => participant.email),
+      });
+    })
+    .catch((err) => console.log(err));
+});
