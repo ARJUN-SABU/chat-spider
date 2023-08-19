@@ -1,33 +1,46 @@
 //packages
+import { useState } from "react";
 import { useNavigate } from "react-router";
+
+//components
+import Logo from "./Logo";
+
+//styles
+import "../styles/HomePage.css";
 
 function HomePage() {
   const navigate = useNavigate();
 
+  const [loginError, setLoginError] = useState("");
+  const [signUpError, setSignUpError] = useState("");
+  const [successfulUserCreation, setSuccessfulUserCreation] = useState("");
+
   function handleLogin() {
-    if (document.querySelector("input").value === "") {
+    if (document.querySelector("#loginUserEmail").value === "") {
       //set the error message
-      alert("User email cannot be empty");
+      setLoginError("User email cannot be empty.");
       return;
     }
 
     //check if the user doesn't exist
     fetch(
       `http://localhost:8000/check-user-exists/${document
-        .querySelector("input")
+        .querySelector("#loginUserEmail")
         .value.toLowerCase()}`
     )
       .then((res) => res.json())
       .then((data) => {
         if (data) {
+          setLoginError("");
           navigate(`/chats`, {
             state: {
-              userID: document.querySelector("input").value.toLowerCase(),
+              userID: document
+                .querySelector("#loginUserEmail")
+                .value.toLowerCase(),
             },
           });
         } else {
-          //set the error message
-          //User doesn't exist
+          setLoginError(`User doesn't exist.`);
         }
       })
       .catch((err) => {
@@ -37,13 +50,13 @@ function HomePage() {
 
   function handleSignUp() {
     if (document.querySelector("#newUserName").value === "") {
-      //set the error message
-      alert("User name cannot be empty");
+      setSignUpError("User name cannot be empty.");
+      setSuccessfulUserCreation("");
       return;
     }
     if (document.querySelector("#newUserEmail").value == "") {
-      //set the error message
-      alert("User email cannot be empty");
+      setSignUpError("User email cannot be empty.");
+      setSuccessfulUserCreation("");
       return;
     }
 
@@ -62,26 +75,59 @@ function HomePage() {
       .then((data) => {
         console.log(data);
         if (data.type === "error") {
-          //set the error message
-          //the user already exists
+          setSignUpError("User already exists.");
+          setSuccessfulUserCreation("");
         } else {
           //since the user was created,
           //show a green message that the user was created
           //and ask them to login
+          setSignUpError("");
+          setSuccessfulUserCreation(
+            "User was created successfully. Please Login."
+          );
         }
       })
       .catch((err) => console.log(err));
   }
 
   return (
-    <div>
-      <h1>ChatSpider</h1>
-      <input type="text" placeholder="Enter the userId" />
-      <button onClick={handleLogin}>Login</button>
+    <div className="homePage">
+      <div className="homePage__logoContainer">
+        <Logo />
+      </div>
+      <div className="homePage__login__outer">
+        <div className="homePage__login">
+          <p>Have an account?</p>
+          <input type="text" placeholder="User Email" id="loginUserEmail" />
+          {loginError !== "" ? (
+            <span className="homePage__errorMessage">{loginError}</span>
+          ) : (
+            ""
+          )}
+          <button onClick={handleLogin}>Login</button>
+        </div>
+      </div>
 
-      <input type="text" placeholder="User Name" id="newUserName" />
-      <input type="email" placeholder="User Email" id="newUserEmail" />
-      <button onClick={handleSignUp}>Create New User</button>
+      <div className="homePage__signUp__outer">
+        <div className="homePage__signUp">
+          <p>Don't have an account?</p>
+          <input type="text" placeholder="User Name" id="newUserName" />
+          <input type="email" placeholder="User Email" id="newUserEmail" />
+          {signUpError !== "" ? (
+            <span className="homePage__errorMessage">{signUpError}</span>
+          ) : (
+            ""
+          )}
+          {successfulUserCreation !== "" ? (
+            <span className="homePage__userCreationSuccessMessage">
+              {successfulUserCreation}
+            </span>
+          ) : (
+            ""
+          )}
+          <button onClick={handleSignUp}>Create New User</button>
+        </div>
+      </div>
     </div>
   );
 }

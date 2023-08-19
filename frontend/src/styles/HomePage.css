@@ -1,0 +1,83 @@
+.homePage {
+  background-color: #f1f3f4;
+  min-height: 100vh;
+  /* padding: 40px 0px 40px 40px; */
+}
+
+.homePage__logoContainer {
+  display: flex;
+  justify-content: center;
+  padding: 60px 20px 60px;
+}
+
+.homePage__login__outer,
+.homePage__signUp__outer {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.homePage__login,
+.homePage__signUp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 35%;
+  min-width: 400px;
+}
+
+.homePage__login p,
+.homePage__signUp p {
+  width: 100%;
+  text-align: left;
+  padding-left: 20px;
+  font-size: 18px;
+  color: rgb(51, 51, 51);
+}
+
+.homePage__login input,
+.homePage__signUp input {
+  width: 100%;
+  display: block;
+  padding: 15px 20px;
+  box-sizing: border-box;
+  font-size: 16px;
+  border: 2px solid transparent;
+  outline: none;
+  background-color: white;
+  box-shadow: 1px 1px 3px 0 rgba(0, 0, 0, 0.2);
+  margin-top: 10px;
+}
+.homePage__login input:focus,
+.homePage__signUp input:focus {
+  border: 2px solid #0e7aef;
+}
+
+.homePage__login button,
+.homePage__signUp button {
+  width: 100%;
+  display: block;
+  cursor: pointer;
+  padding: 10px;
+  font-size: 16px;
+  outline: none;
+  border: none;
+  background-color: #0e7aef;
+  color: white;
+  margin-top: 15px;
+}
+
+.homePage__errorMessage,
+.homePage__userCreationSuccessMessage {
+  color: #f02849;
+  text-align: left;
+  width: 100%;
+  padding-left: 15px;
+  margin-top: 3px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.homePage__userCreationSuccessMessage {
+  color: green;
+}
