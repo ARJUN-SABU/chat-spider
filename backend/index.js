@@ -35,7 +35,7 @@ connectToDb((err) => {
     };
     app.use(cors(corsOptions));
 
-    //---------------------------- socket.io settings ------------------------------------------
+    //---------------------------- socket.io settings -------------------------------------------
     let usersEmailToSocketMap = new Map();
     let usersSocketToEmailMap = new Map();
     let io = new Server(server_new, {
