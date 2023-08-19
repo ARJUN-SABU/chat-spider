@@ -20,20 +20,11 @@ connectToDb((err) => {
     //middlewares
     app.use(express.json());
 
-    let whiteListDomains = [
-      "http://localhost:3000",
-      "https://chat-spider-frontend.vercel.app",
-    ];
-    let corsOptions = {
-      origin: function (origin, callback) {
-        if (whiteListDomains.indexOf(origin) !== -1) {
-          callback(null, true);
-        } else {
-          callback(new Error("Not Allowed by CORS"));
-        }
-      },
-    };
-    app.use(cors(corsOptions));
+    app.use(
+      cors({
+        origin: "*",
+      })
+    );
 
     //---------------------------- socket.io settings -------------------------------------------
     let usersEmailToSocketMap = new Map();
