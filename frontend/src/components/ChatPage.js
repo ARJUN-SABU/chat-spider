@@ -7,6 +7,7 @@ import uuid4 from "uuid4";
 //components
 import ChatPreview from "./ChatPreview";
 import SingleMessageBlock from "./SingleMessageBlock";
+import Logo from "./Logo";
 
 //icons
 import { IoSend, IoAppsSharp, IoArrowBack } from "react-icons/io5";
@@ -422,6 +423,7 @@ function ChatPage() {
   function handleChatPreviewClick(chatRoomID, chatName) {
     if (!currentChatWindow) {
       document.querySelector("#noWindowSelectedScreen").classList.add("hide");
+      document.querySelector(".chatPage__logoContainer").classList.add("hide");
     } else {
       document
         .querySelector(`#chatWindow-${currentChatWindow}`)
@@ -880,6 +882,7 @@ function ChatPage() {
       .querySelector(`#chatWindow-${currentChatWindow}`)
       .classList.add("hide");
     document.querySelector("#noWindowSelectedScreen").classList.remove("hide");
+    document.querySelector(".chatPage__logoContainer").classList.remove("hide");
 
     document
       .querySelector(".chatPage__rightSection__bottom")
@@ -1205,7 +1208,9 @@ function ChatPage() {
             className="chatPage__rightSection__middle__liveChatWindow"
             id="noWindowSelectedScreen"
           >
-            <p>No window is selected right now</p>
+            <div className="chatPage__logoContainer">
+              <Logo />
+            </div>
           </div>
 
           {userChatList.map((userChat) => (
