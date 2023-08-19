@@ -81,3 +81,11 @@
 .homePage__userCreationSuccessMessage {
   color: green;
 }
+
+@media (max-width: 444px) {
+  .homePage__login,
+  .homePage__signUp {
+    width: 100%;
+    min-width: 0;
+  }
+}
