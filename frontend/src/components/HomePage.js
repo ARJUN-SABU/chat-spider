@@ -73,7 +73,6 @@ function HomePage() {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
         if (data.type === "error") {
           setSignUpError("User already exists.");
           setSuccessfulUserCreation("");

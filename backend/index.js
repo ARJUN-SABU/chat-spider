@@ -47,9 +47,7 @@ let io = new Server(server_new, {
   },
 });
 io.on("connection", (socket) => {
-  console.log("Socket ID --> " + socket.id);
   socket.on("register-user", (userBlock) => {
-    console.log("User's Email ---> " + userBlock.userEmail);
     usersEmailToSocketMap.set(userBlock.userEmail, socket);
     usersSocketToEmailMap.set(socket, userBlock.userEmail);
 
@@ -65,8 +63,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send-new-message", (messageBlock) => {
-    console.log(messageBlock);
-
     //send to the room.
     socket.to(messageBlock.roomID).emit("recieve-new-message", {
       senderName: messageBlock.senderName,
@@ -98,9 +94,7 @@ io.on("connection", (socket) => {
           },
         }
       )
-      .then((doc) => {
-        console.log(doc);
-      })
+      .then((doc) => {})
       .catch((err) => {
         console.log(err);
         res.status(500).json({
@@ -114,8 +108,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("update-user-chat-list", (userChatListBlock) => {
-    console.log(userChatListBlock);
-
     db.collection("chat-spider-users")
       .updateOne(
         {
@@ -127,9 +119,7 @@ io.on("connection", (socket) => {
           },
         }
       )
-      .then((doc) => {
-        console.log(doc);
-      })
+      .then((doc) => {})
       .catch((err) => {
         console.log(err);
       });
@@ -141,7 +131,6 @@ io.on("connection", (socket) => {
     let userEmail = usersSocketToEmailMap.get(socket);
     usersSocketToEmailMap.delete(socket);
     usersEmailToSocketMap.delete(userEmail);
-    console.log(userEmail + " has left the chat ");
 
     //update the chats to which the current user is connected
     //that the current user has gone offline
@@ -159,7 +148,6 @@ io.on("connection", (socket) => {
         }
       )
       .then((doc) => {
-        console.log(doc);
         doc?.userChats.forEach((userChat) => {
           if (userChat.type === "singleChat") {
             socket.to(userChat.roomID).emit("offline-signal", userChat.roomID);
@@ -221,8 +209,6 @@ app.post("/create-new-user", (req, res) => {
         db.collection("chat-spider-users")
           .insertOne(req.body)
           .then((result) => {
-            console.log(result);
-
             res.status(200).json({
               type: "acknowledgement",
               message: "New user created",
@@ -265,7 +251,7 @@ app.post("/create-new-chat", (req, res) => {
             },
           }
         )
-        .then((res) => console.log(res))
+        .then((res) => {})
         .catch((err) => {
           console.log(err);
           res.status(500).json(err);
@@ -292,7 +278,7 @@ app.post("/create-new-chat", (req, res) => {
             },
           }
         )
-        .then((res) => console.log(res))
+        .then((res) => {})
         .catch((err) => {
           console.log(err);
           res.status(500).json(err);
@@ -318,7 +304,7 @@ app.post("/create-new-chat", (req, res) => {
             },
           ],
         })
-        .then((res) => console.log(res))
+        .then((res) => {})
         .catch((err) => {
           console.log(err);
           res.status(500).json(err);
@@ -376,7 +362,7 @@ app.post("/create-new-group", (req, res) => {
           },
         }
       )
-      .then((res) => console.log(res))
+      .then((res) => {})
       .catch((err) => {
         console.log(err);
         res.status(500).json(err);
@@ -391,7 +377,7 @@ app.post("/create-new-group", (req, res) => {
       participants: req.body.participants,
       messages: [],
     })
-    .then((res) => console.log(res))
+    .then((res) => {})
     .catch((err) => {
       console.log(err);
       res.status(500).json(err);
@@ -420,8 +406,6 @@ app.post("/create-new-group", (req, res) => {
 });
 
 app.post("/join-new-group", (req, res) => {
-  console.log(req.body);
-
   db.collection("chat-spider-chats")
     .findOne(
       {
@@ -434,7 +418,6 @@ app.post("/join-new-group", (req, res) => {
       }
     )
     .then((doc) => {
-      console.log(doc);
       if (!doc) {
         res.status(400).json({
           error_message: "Group with the given ID doesn't exist",
@@ -456,9 +439,7 @@ app.post("/join-new-group", (req, res) => {
             },
           }
         )
-        .then((res) => {
-          console.log(res);
-        })
+        .then((res) => {})
         .catch((err) => {
           console.log(err);
           res.status(500).json({
@@ -486,9 +467,7 @@ app.post("/join-new-group", (req, res) => {
             },
           }
         )
-        .then((res) => {
-          console.log(res);
-        })
+        .then((res) => {})
         .catch((err) => {
           console.log(err);
           res.status(500).json({
@@ -542,7 +521,6 @@ app.get("/get-messages/:roomID/:messagesToBeSkipped", (req, res) => {
       }
     )
     .then((doc) => {
-      // console.log(doc);
       res.status(200).json(doc);
     })
     .catch((err) => {
@@ -571,7 +549,6 @@ app.get("/chat-preview-message/:roomID", (req, res) => {
       }
     )
     .then((doc) => {
-      // console.log(doc);
       res.status(200).json({
         message: doc.messages[0].content,
       });
@@ -595,7 +572,6 @@ app.get("/check-user-online/:roomID/:userEmail", (req, res) => {
       }
     )
     .then((doc) => {
-      console.log("online ---> ", doc);
       if (!doc) {
         res.status(500).json({
           error_message: "couldn't fetch the document",
@@ -622,7 +598,6 @@ app.get("/check-user-online/:roomID/:userEmail", (req, res) => {
 });
 
 app.get("/group-members-list/:roomID", (req, res) => {
-  console.log(req.params.roomID);
   db.collection("chat-spider-chats")
     .findOne(
       {

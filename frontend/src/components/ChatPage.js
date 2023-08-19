@@ -6,7 +6,6 @@ import uuid4 from "uuid4";
 
 //components
 import ChatPreview from "./ChatPreview";
-import SingleMessageBlock from "./SingleMessageBlock";
 import Logo from "./Logo";
 
 //icons
@@ -85,8 +84,6 @@ function ChatPage() {
             )
               .then((res) => res.json())
               .then((data) => {
-                console.log(data);
-
                 setRoomPreviewMessageMap((previousMap) => {
                   previousMap.set(
                     userChat.roomID,
@@ -153,7 +150,6 @@ function ChatPage() {
 
   // ------------------------------- socket events -------------------------------
   socket.on("new-singleChat-start-message", (message) => {
-    console.log("This is the new message -> ", message);
     chatRoomIDToUnreadMessagesMap.set(message.roomID, []);
     displayedMessageCountMap.set(message.roomID, 0);
     fetchedAllMessagesMap.set(message.roomID, false);
@@ -212,10 +208,6 @@ function ChatPage() {
   });
 
   socket.on("new-group-creation-notification", (message) => {
-    // console.log(message);
-    // console.log(userChatList);
-
-    console.log("Hohohohohoh group was created");
     chatRoomIDToUnreadMessagesMap.set(message.roomID, []);
     displayedMessageCountMap.set(message.roomID, 0);
     fetchedAllMessagesMap.set(message.roomID, false);
@@ -251,8 +243,6 @@ function ChatPage() {
   // });
 
   socket.on("recieve-new-message", (message) => {
-    console.log(message);
-
     //Bring that chat from to the top from whcih we
     //recieved the latest message.
 
@@ -275,12 +265,6 @@ function ChatPage() {
           message.roomID
         );
 
-        console.log(
-          document.querySelector(`#chatWindow-${message.roomID}`).scrollTop
-        );
-        console.log(
-          document.querySelector(`#chatWindow-${message.roomID}`).scrollHeight
-        );
         document.querySelector(`#chatWindow-${message.roomID}`).scrollTop =
           document.querySelector(`#chatWindow-${message.roomID}`).scrollHeight;
       } else {
@@ -292,14 +276,6 @@ function ChatPage() {
         });
 
         if (document.querySelector(`#chatWindow-${currentSelectedChat}`)) {
-          console.log(
-            document.querySelector(`#chatWindow-${currentSelectedChat}`)
-              .scrollTop
-          );
-          console.log(
-            document.querySelector(`#chatWindow-${currentSelectedChat}`)
-              .scrollHeight
-          );
           document.querySelector(
             `#chatWindow-${currentSelectedChat}`
           ).scrollTop = document.querySelector(
@@ -359,8 +335,6 @@ function ChatPage() {
   //------------------------------- utitlity functions -------------------------------
 
   function displayMessages(messages, chatRoomID) {
-    // console.log(messages);
-
     messages.forEach((message) => {
       let chatWindow = document.querySelector(`#chatWindow-${chatRoomID}`);
       let messageBlock = document.createElement("div");
@@ -397,7 +371,6 @@ function ChatPage() {
       messageBlock.append(dateTime);
       messageBlock.append(messageTriangle);
 
-      // console.log(messageBlock);
       chatWindow.append(messageBlock);
     });
   }
@@ -504,7 +477,6 @@ function ChatPage() {
       )
         .then((res) => res.json())
         .then((data) => {
-          console.log("User is ----> ", data.online);
           setUserIsOnline(data.online);
         })
         .catch((err) => {
@@ -520,8 +492,6 @@ function ChatPage() {
       fetch(`http://localhost:8000/get-messages/${chatRoomID}/0`)
         .then((res) => res.json())
         .then((data) => {
-          console.log(data);
-
           //render these messages
           displayMessages(data.messages.reverse(), chatRoomID);
           document.querySelector(`#chatWindow-${chatRoomID}`).scrollTop =
@@ -600,8 +570,6 @@ function ChatPage() {
       .querySelectorAll(".chatPage__leftSection__bottom__groupSelectionUser")
       .forEach((userBlock) => {
         if (userBlock.classList.contains("selected")) {
-          // console.log(userBlock);
-
           newGroupMembers.push({
             name: userBlock.querySelector(
               ".chatPage__leftSection__bottom__groupSelectionUser__name"
@@ -619,7 +587,6 @@ function ChatPage() {
       alert("Group cannot be empty!");
       return;
     }
-    console.log(newGroupMembers);
 
     let roomID = uuid4();
     fetch("http://localhost:8000/create-new-group", {
@@ -636,8 +603,6 @@ function ChatPage() {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
-
         setUserChatList((previous) => {
           let newChatList = [
             {
@@ -733,7 +698,6 @@ function ChatPage() {
           )
             .then((res) => res.json())
             .then((data) => {
-              console.log("User is ----> ", data.online);
               setUserIsOnline(data.online);
             })
             .catch((err) => {
@@ -829,7 +793,6 @@ function ChatPage() {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
         setUserChatList((previous) => {
           let newChatList = [
             {
@@ -854,7 +817,6 @@ function ChatPage() {
         )
           .then((res) => res.json())
           .then((data) => {
-            console.log(data);
             setRoomPreviewMessageMap((previousMap) => {
               previousMap.set(
                 groupRoomIDToJoin.current.value,
@@ -908,7 +870,6 @@ function ChatPage() {
         )
           .then((res) => res.json())
           .then((data) => {
-            console.log(data);
             setLoadingMessages(false);
 
             if (data.messages.length === 0) {
@@ -927,7 +888,6 @@ function ChatPage() {
             console.log(err);
           });
       }
-      console.log(loadingMessages);
     }
   }
 
