@@ -172,6 +172,30 @@ io.on("connection", (socket) => {
 });
 
 //routes
+
+app.get("/check-user-exists/:userId", (req, res) => {
+  db.collection("chat-spider-users")
+    .findOne(
+      {
+        userEmail: req.params.userId,
+      },
+      {
+        projection: {
+          _id: 1,
+        },
+      }
+    )
+    .then((doc) => {
+      res.status(200).json(doc);
+    })
+    .catch((err) => {
+      res.status(500).json({
+        error_message: "Unable to fetch the user information",
+      });
+      console.log(err);
+    });
+});
+
 app.get("/user-chats-and-groups/:userId", (req, res) => {
   db.collection("chat-spider-users")
     .findOne({
@@ -191,12 +215,20 @@ app.post("/create-new-user", (req, res) => {
     .then((doc) => {
       if (doc) {
         res.status(400).json({
-          error: "the user already exists",
+          type: "error",
+          message: "The user already exists",
         });
       } else {
         db.collection("chat-spider-users")
           .insertOne(req.body)
-          .then((res) => console.log(res))
+          .then((result) => {
+            console.log(result);
+
+            res.status(200).json({
+              type: "acknowledgement",
+              message: "New user created",
+            });
+          })
           .catch((err) => console.log(err));
       }
     })

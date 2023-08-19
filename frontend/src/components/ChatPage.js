@@ -1,6 +1,6 @@
 //packages
 import { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { io } from "socket.io-client";
 import uuid4 from "uuid4";
 
@@ -15,7 +15,9 @@ import { IoSend, IoAppsSharp, IoArrowBack } from "react-icons/io5";
 import "../styles/ChatPage.css";
 
 function ChatPage() {
-  const params = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const socket = io("http://localhost:8000/");
 
   //states
@@ -51,69 +53,74 @@ function ChatPage() {
   const newMessage = useRef();
 
   useEffect(() => {
-    //TODO:
-    //replace the local url with production url:
-    //https://chat-spider-backend.vercel.app/user-chats-and-groups/${params.userId}
-    fetch(`http://localhost:8000/user-chats-and-groups/${params.userId}`)
-      .then((data) => data.json())
-      .then((userDoc) => {
-        setCurrentUser({
-          name: userDoc.userName,
-          email: userDoc.userEmail,
-        });
-
-        setUserChatList(userDoc.userChats);
-        setUniqueContacts(getUniqueContacts(userDoc.userChats));
-        setChatRoomIDToUnreadMessagesMap((previous) => {
-          userDoc.userChats.forEach((userChat) => {
-            previous.set(userChat.roomID, []);
-            displayedMessageCountMap.set(userChat.roomID, 0);
-            fetchedAllMessagesMap.set(userChat.roomID, false);
+    if (!location.state) {
+      navigate("/");
+    } else {
+      fetch(
+        `http://localhost:8000/user-chats-and-groups/${location.state.userID}`
+      )
+        .then((data) => data.json())
+        .then((userDoc) => {
+          setCurrentUser({
+            name: userDoc.userName,
+            email: userDoc.userEmail,
           });
-          return previous;
-        });
 
-        userDoc.userChats.forEach((userChat) => {
-          fetch(`http://localhost:8000/chat-preview-message/${userChat.roomID}`)
-            .then((res) => res.json())
-            .then((data) => {
-              console.log(data);
-
-              setRoomPreviewMessageMap((previousMap) => {
-                previousMap.set(
-                  userChat.roomID,
-                  data.message.substring(0, 20) + "..."
-                );
-
-                return new Map(previousMap);
-              });
-            })
-            .catch((err) => {
-              console.log(err);
+          setUserChatList(userDoc.userChats);
+          setUniqueContacts(getUniqueContacts(userDoc.userChats));
+          setChatRoomIDToUnreadMessagesMap((previous) => {
+            userDoc.userChats.forEach((userChat) => {
+              previous.set(userChat.roomID, []);
+              displayedMessageCountMap.set(userChat.roomID, 0);
+              fetchedAllMessagesMap.set(userChat.roomID, false);
             });
-        });
+            return previous;
+          });
 
-        setRoomPreviewMessageMap((previousMap) => {
-          return new Map(previousMap);
-        });
+          userDoc.userChats.forEach((userChat) => {
+            fetch(
+              `http://localhost:8000/chat-preview-message/${userChat.roomID}`
+            )
+              .then((res) => res.json())
+              .then((data) => {
+                console.log(data);
 
-        //Send the current user's email to the server by this hello message
-        //so that the server can create an email to socket object mapping and
-        //register the current user. This way the server stores the information
-        //about whether the current user is still connected to the server or not.
-        //Also, we can grab that user (i.e, the user's socket object) with this
-        //specific email address and make it join a room when a new individual
-        //chat is created.
+                setRoomPreviewMessageMap((previousMap) => {
+                  previousMap.set(
+                    userChat.roomID,
+                    data.message.substring(0, 20) + "..."
+                  );
 
-        socket.emit("register-user", {
-          userEmail: params.userId,
-          chatRooms: userDoc.userChats.map((userChat) => ({
-            roomID: userChat.roomID,
-            type: userChat.type,
-          })),
-        });
-      })
-      .catch((err) => console.log(err));
+                  return new Map(previousMap);
+                });
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          });
+
+          setRoomPreviewMessageMap((previousMap) => {
+            return new Map(previousMap);
+          });
+
+          //Send the current user's email to the server by this hello message
+          //so that the server can create an email to socket object mapping and
+          //register the current user. This way the server stores the information
+          //about whether the current user is still connected to the server or not.
+          //Also, we can grab that user (i.e, the user's socket object) with this
+          //specific email address and make it join a room when a new individual
+          //chat is created.
+
+          socket.emit("register-user", {
+            userEmail: location.state.userID,
+            chatRooms: userDoc.userChats.map((userChat) => ({
+              roomID: userChat.roomID,
+              type: userChat.type,
+            })),
+          });
+        })
+        .catch((err) => console.log(err));
+    }
   }, []);
 
   useEffect(() => {
