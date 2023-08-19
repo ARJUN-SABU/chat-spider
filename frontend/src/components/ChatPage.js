@@ -46,6 +46,7 @@ function ChatPage() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [userIsTyping, setUserIsTyping] = useState("");
   const [userIsOnline, setUserIsOnline] = useState(false);
+  const [newUserErrorMessage, setNewUserErrorMessage] = useState("");
 
   const newSingleChatUserEmail = useRef();
   const newSingleChatMessage = useRef();
@@ -138,6 +139,17 @@ function ChatPage() {
       document.querySelector(".chatPage__rightSection").classList.add("hide");
     }
   }, []);
+
+  useEffect(() => {
+    if (currentChatWindow) {
+      setTimeout(() => {
+        document.querySelector(`#chatWindow-${currentChatWindow}`).scrollTop =
+          document.querySelector(
+            `#chatWindow-${currentChatWindow}`
+          ).scrollHeight;
+      }, 300);
+    }
+  }, [userChatList]);
 
   // ------------------------------- socket events -------------------------------
   socket.on("new-singleChat-start-message", (message) => {
@@ -243,16 +255,6 @@ function ChatPage() {
 
     //Bring that chat from to the top from whcih we
     //recieved the latest message.
-    setUserChatList((previous) => {
-      let idx = previous.findIndex(
-        (userChat) => userChat.roomID === message.roomID
-      );
-      let removedChat = previous.splice(idx, 1)[0];
-
-      let newChatList = [removedChat, ...previous];
-
-      return newChatList;
-    });
 
     setRoomPreviewMessageMap((previousMap) => {
       previousMap.set(message.roomID, `${message.content.substring(0, 20)}...`);
@@ -273,6 +275,12 @@ function ChatPage() {
           message.roomID
         );
 
+        console.log(
+          document.querySelector(`#chatWindow-${message.roomID}`).scrollTop
+        );
+        console.log(
+          document.querySelector(`#chatWindow-${message.roomID}`).scrollHeight
+        );
         document.querySelector(`#chatWindow-${message.roomID}`).scrollTop =
           document.querySelector(`#chatWindow-${message.roomID}`).scrollHeight;
       } else {
@@ -282,9 +290,36 @@ function ChatPage() {
           content: message.content,
           dateTime: message.dateTime,
         });
+
+        if (document.querySelector(`#chatWindow-${currentSelectedChat}`)) {
+          console.log(
+            document.querySelector(`#chatWindow-${currentSelectedChat}`)
+              .scrollTop
+          );
+          console.log(
+            document.querySelector(`#chatWindow-${currentSelectedChat}`)
+              .scrollHeight
+          );
+          document.querySelector(
+            `#chatWindow-${currentSelectedChat}`
+          ).scrollTop = document.querySelector(
+            `#chatWindow-${currentSelectedChat}`
+          ).scrollHeight;
+        }
       }
 
       return currentSelectedChat;
+    });
+
+    setUserChatList((previous) => {
+      let idx = previous.findIndex(
+        (userChat) => userChat.roomID === message.roomID
+      );
+      let removedChat = previous.splice(idx, 1)[0];
+
+      let newChatList = [removedChat, ...previous];
+
+      return newChatList;
     });
   });
 
@@ -469,6 +504,7 @@ function ChatPage() {
       )
         .then((res) => res.json())
         .then((data) => {
+          console.log("User is ----> ", data.online);
           setUserIsOnline(data.online);
         })
         .catch((err) => {
@@ -687,6 +723,24 @@ function ChatPage() {
       })
         .then((res) => res.json())
         .then((data) => {
+          if (!data) {
+            setNewUserErrorMessage("User doesn't exist");
+            return;
+          }
+
+          fetch(
+            `http://localhost:8000/check-user-online/${roomID}/${currentUser.email}`
+          )
+            .then((res) => res.json())
+            .then((data) => {
+              console.log("User is ----> ", data.online);
+              setUserIsOnline(data.online);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+
+          setNewUserErrorMessage("");
           setUserChatList((previous) => {
             let newChatList = [
               {
@@ -1033,6 +1087,11 @@ function ChatPage() {
             type="email"
             ref={newSingleChatUserEmail}
           />
+          {newUserErrorMessage !== "" ? (
+            <p className="chatPage__errorMessage">{newUserErrorMessage}</p>
+          ) : (
+            ""
+          )}
           <textarea
             placeholder="Say Hi"
             ref={newSingleChatMessage}

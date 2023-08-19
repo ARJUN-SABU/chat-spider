@@ -1,5 +1,4 @@
 const express = require("express");
-const { ObjectId } = require("mongodb");
 const { connectToDb, getDb } = require("./db");
 const cors = require("cors");
 const app = express();
@@ -78,36 +77,36 @@ io.on("connection", (socket) => {
     });
 
     // send to the database
-    // db.collection("chat-spider-chats")
-    //   .updateOne(
-    //     {
-    //       roomID: messageBlock.roomID,
-    //     },
-    //     {
-    //       $push: {
-    //         messages: {
-    //           $position: 0,
-    //           $each: [
-    //             {
-    //               senderName: messageBlock.senderName,
-    //               senderEmail: messageBlock.senderEmail,
-    //               content: messageBlock.content,
-    //               dateTime: new Date().toUTCString(),
-    //             },
-    //           ],
-    //         },
-    //       },
-    //     }
-    //   )
-    //   .then((doc) => {
-    //     console.log(doc);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //     res.status(500).json({
-    //       error_message: "message couldn't be sent",
-    //     });
-    //   });
+    db.collection("chat-spider-chats")
+      .updateOne(
+        {
+          roomID: messageBlock.roomID,
+        },
+        {
+          $push: {
+            messages: {
+              $position: 0,
+              $each: [
+                {
+                  senderName: messageBlock.senderName,
+                  senderEmail: messageBlock.senderEmail,
+                  content: messageBlock.content,
+                  dateTime: new Date().toUTCString(),
+                },
+              ],
+            },
+          },
+        }
+      )
+      .then((doc) => {
+        console.log(doc);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({
+          error_message: "message couldn't be sent",
+        });
+      });
   });
 
   socket.on("send-typing-signal", (typingBlock) => {
@@ -242,81 +241,88 @@ app.post("/create-new-chat", (req, res) => {
     })
     .then((doc) => {
       if (!doc) {
-        res.status(400).json({
-          error: "the user with the given email-id doesn't exist",
-        });
+        res.status(400).json(doc);
       }
 
-      // db.collection("chat-spider-users")
-      //   .updateOne(
-      //     {
-      //       userEmail: req.body.senderEmail,
-      //     },
-      //     {
-      //       $push: {
-      //         userChats: {
-      //           $position: 0,
-      //           $each: [
-      //             {
-      //               type: "singleChat",
-      //               participantName: doc.userName,
-      //               participantEmail: req.body.recipientEmail,
-      //               roomID: req.body.roomID,
-      //             },
-      //           ],
-      //         },
-      //       },
-      //     }
-      //   )
-      //   .then((res) => console.log(res))
-      //   .catch((err) => {
-      //     console.log(err);
-      //     res.status(500).json(err);
-      //   });
+      db.collection("chat-spider-users")
+        .updateOne(
+          {
+            userEmail: req.body.senderEmail,
+          },
+          {
+            $push: {
+              userChats: {
+                $position: 0,
+                $each: [
+                  {
+                    type: "singleChat",
+                    participantName: doc.userName,
+                    participantEmail: req.body.recipientEmail,
+                    roomID: req.body.roomID,
+                  },
+                ],
+              },
+            },
+          }
+        )
+        .then((res) => console.log(res))
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json(err);
+        });
 
-      // db.collection("chat-spider-users")
-      //   .updateOne(
-      //     {
-      //       userEmail: req.body.recipientEmail,
-      //     },
-      //     {
-      //       $push: {
-      //         userChats: {
-      //           $position: 0,
-      //           $each: [
-      //             {
-      //               type: "singleChat",
-      //               participantName: req.body.senderName,
-      //               participantEmail: req.body.senderEmail,
-      //               roomID: req.body.roomID,
-      //             },
-      //           ],
-      //         },
-      //       },
-      //     }
-      //   )
-      //   .then((res) => console.log(res))
-      //   .catch((err) => {
-      //     console.log(err);
-      //     res.status(500).json(err);
-      //   });
+      db.collection("chat-spider-users")
+        .updateOne(
+          {
+            userEmail: req.body.recipientEmail,
+          },
+          {
+            $push: {
+              userChats: {
+                $position: 0,
+                $each: [
+                  {
+                    type: "singleChat",
+                    participantName: req.body.senderName,
+                    participantEmail: req.body.senderEmail,
+                    roomID: req.body.roomID,
+                  },
+                ],
+              },
+            },
+          }
+        )
+        .then((res) => console.log(res))
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json(err);
+        });
 
-      // db.collection("chat-spider-chats")
-      //   .insertOne({
-      //     roomID: req.body.roomID,
-      //     type: "singleChat",
-      //     messages: [
-      //       {
-      //         senderName: req.body.senderName,
-      //         content: req.body.message,
-      //       },
-      //     ],
-      //   })
-      //   .then((res) => console.log(res))
-      //   .catch((err) => {
-      //     console.log(err);
-      //     res.status(500).json(err);
-      //   });
+      db.collection("chat-spider-chats")
+        .insertOne({
+          roomID: req.body.roomID,
+          type: "singleChat",
+          participants: [
+            { name: req.body.senderName, email: req.body.senderEmail },
+            {
+              name: doc.userName,
+              email: req.body.recipientEmail,
+            },
+          ],
+          messages: [
+            {
+              senderName: req.body.senderName,
+              senderEmail: req.body.senderEmail,
+              content: req.body.message,
+              dateTime: new Date().toUTCString(),
+            },
+          ],
+        })
+        .then((res) => console.log(res))
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json(err);
+        });
 
       //if recipient is online, we can connect the sender
       //and the recipient to the roomID.
@@ -349,47 +355,47 @@ app.post("/create-new-chat", (req, res) => {
 
 app.post("/create-new-group", (req, res) => {
   //Inserting in Database
-  // req.body.participants.forEach((participant) => {
-  //   db.collection("chat-spider-users")
-  //     .updateOne(
-  //       {
-  //         userEmail: participant.email,
-  //       },
-  //       {
-  //         $push: {
-  //           userChats: {
-  //             $position: 0,
-  //             $each: [
-  //               {
-  //                 type: "groupChat",
-  //                 roomID: req.body.roomID,
-  //                 groupName: req.body.groupName,
-  //               },
-  //             ],
-  //           },
-  //         },
-  //       }
-  //     )
-  //     .then((res) => console.log(res))
-  //     .catch((err) => {
-  //       console.log(err);
-  //       res.status(500).json(err);
-  //     });
-  // });
+  req.body.participants.forEach((participant) => {
+    db.collection("chat-spider-users")
+      .updateOne(
+        {
+          userEmail: participant.email,
+        },
+        {
+          $push: {
+            userChats: {
+              $position: 0,
+              $each: [
+                {
+                  type: "groupChat",
+                  roomID: req.body.roomID,
+                  groupName: req.body.groupName,
+                },
+              ],
+            },
+          },
+        }
+      )
+      .then((res) => console.log(res))
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json(err);
+      });
+  });
 
-  // db.collection("chat-spider-chats")
-  //   .insertOne({
-  //     type: "groupChat",
-  //     roomID: req.body.roomID,
-  //     groupName: req.body.groupName,
-  //     participants: req.body.participants,
-  //     messages: [],
-  //   })
-  //   .then((res) => console.log(res))
-  //   .catch((err) => {
-  //     console.log(err);
-  //     res.status(500).json(err);
-  //   });
+  db.collection("chat-spider-chats")
+    .insertOne({
+      type: "groupChat",
+      roomID: req.body.roomID,
+      groupName: req.body.groupName,
+      participants: req.body.participants,
+      messages: [],
+    })
+    .then((res) => console.log(res))
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
+    });
 
   //update the users who are online
   //that a new group has been created
@@ -436,59 +442,59 @@ app.post("/join-new-group", (req, res) => {
       }
 
       // update the database
-      // db.collection("chat-spider-chats")
-      //   .updateOne(
-      //     {
-      //       roomID: req.body.roomID,
-      //     },
-      //     {
-      //       $push: {
-      //         participants: {
-      //           name: req.body.userName,
-      //           email: req.body.userEmail,
-      //         },
-      //       },
-      //     }
-      //   )
-      //   .then((res) => {
-      //     console.log(res);
-      //   })
-      //   .catch((err) => {
-      //     console.log(err);
-      //     res.status(500).json({
-      //       error_message: "Group couldn't be created",
-      //     });
-      //   });
+      db.collection("chat-spider-chats")
+        .updateOne(
+          {
+            roomID: req.body.roomID,
+          },
+          {
+            $push: {
+              participants: {
+                name: req.body.userName,
+                email: req.body.userEmail,
+              },
+            },
+          }
+        )
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({
+            error_message: "Group couldn't be created",
+          });
+        });
 
-      // db.collection("chat-spider-users")
-      //   .updateOne(
-      //     {
-      //       userEmail: req.body.userEmail,
-      //     },
-      //     {
-      //       $push: {
-      //         userChats: {
-      //           $position: 0,
-      //           $each: [
-      //             {
-      //               type: "groupChat",
-      //               roomID: req.body.roomID,
-      //               groupName: doc.groupName,
-      //             },
-      //           ],
-      //         },
-      //       },
-      //     }
-      //   )
-      //   .then((res) => {
-      //     console.log(res);
-      //   })
-      //   .catch((err) => {
-      //     console.log(err);
-      //     res.status(500).json({
-      //       error_message: "group was not created",
-      //     });
-      //   });
+      db.collection("chat-spider-users")
+        .updateOne(
+          {
+            userEmail: req.body.userEmail,
+          },
+          {
+            $push: {
+              userChats: {
+                $position: 0,
+                $each: [
+                  {
+                    type: "groupChat",
+                    roomID: req.body.roomID,
+                    groupName: doc.groupName,
+                  },
+                ],
+              },
+            },
+          }
+        )
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({
+            error_message: "group was not created",
+          });
+        });
 
       //join the group with the given roomID
       //also update the members
@@ -530,7 +536,7 @@ app.get("/get-messages/:roomID/:messagesToBeSkipped", (req, res) => {
           type: 0,
           _id: 0,
           messages: {
-            $slice: [Number(req.params.messagesToBeSkipped), 5],
+            $slice: [Number(req.params.messagesToBeSkipped), 15],
           },
         },
       }
@@ -589,6 +595,7 @@ app.get("/check-user-online/:roomID/:userEmail", (req, res) => {
       }
     )
     .then((doc) => {
+      console.log("online ---> ", doc);
       if (!doc) {
         res.status(500).json({
           error_message: "couldn't fetch the document",
