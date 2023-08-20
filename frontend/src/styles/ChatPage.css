@@ -222,10 +222,11 @@
   cursor: pointer;
   border-bottom: 1px solid rgba(255, 255, 255, 0.5);
   padding: 15px 20px;
+  background-color: #0e7aef;
 }
 
 .chatPage__leftSection__bottom__groupSelectionUser:hover {
-  background-color: #3098ff;
+  /* background-color: #3098ff; */
 }
 
 .chatPage__leftSection__bottom--createNewGroupPanel button {
@@ -490,6 +491,9 @@
   .chatPage__leftSection {
     width: 100%;
   }
+  /* .chatPage__leftSection__bottom__groupSelectionUser:hover {
+    background-color: #0e7aef;
+  } */
   .chatMessage {
     max-width: 300px;
   }

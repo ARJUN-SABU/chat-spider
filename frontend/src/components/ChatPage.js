@@ -17,8 +17,10 @@ import "../styles/ChatPage.css";
 function ChatPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  // const apiURL = "http://localhost:8000/";
+  const apiURL = "https://chat-spider.onrender.com/";
 
-  const socket = io("https://chat-spider.onrender.com/");
+  const socket = io(`${apiURL}`);
 
   //states
   const [userChatList, setUserChatList] = useState([]);
@@ -57,9 +59,7 @@ function ChatPage() {
     if (!location.state) {
       navigate("/");
     } else {
-      fetch(
-        `https://chat-spider.onrender.com/user-chats-and-groups/${location.state.userID}`
-      )
+      fetch(`${apiURL}user-chats-and-groups/${location.state.userID}`)
         .then((data) => data.json())
         .then((userDoc) => {
           setCurrentUser({
@@ -79,9 +79,7 @@ function ChatPage() {
           });
 
           userDoc.userChats.forEach((userChat) => {
-            fetch(
-              `https://chat-spider.onrender.com/chat-preview-message/${userChat.roomID}`
-            )
+            fetch(`${apiURL}chat-preview-message/${userChat.roomID}`)
               .then((res) => res.json())
               .then((data) => {
                 setRoomPreviewMessageMap((previousMap) => {
@@ -150,60 +148,65 @@ function ChatPage() {
 
   // ------------------------------- socket events -------------------------------
   socket.on("new-singleChat-start-message", (message) => {
-    chatRoomIDToUnreadMessagesMap.set(message.roomID, []);
-    displayedMessageCountMap.set(message.roomID, 0);
-    fetchedAllMessagesMap.set(message.roomID, false);
-    setRoomPreviewMessageMap((previousMap) => {
-      previousMap.set(
-        message.roomID,
-        `${message.messageContent.substring(0, 20)}...`
-      );
-      return new Map(previousMap);
-    });
+    setChatRoomIDToUnreadMessagesMap((previous) => {
+      previous.set(message.roomID, []);
 
-    setUserChatList((previous) => {
-      let newChatList = [
+      displayedMessageCountMap.set(message.roomID, 0);
+      fetchedAllMessagesMap.set(message.roomID, false);
+      setRoomPreviewMessageMap((previousMap) => {
+        previousMap.set(
+          message.roomID,
+          `${message.messageContent.substring(0, 20)}...`
+        );
+        return new Map(previousMap);
+      });
+
+      setUserChatList((previous) => {
+        let newChatList = [
+          {
+            type: "singleChat",
+            participantName: message.senderName,
+            participantEmail: message.senderEmail,
+            roomID: message.roomID,
+          },
+          ...previous,
+        ];
+
+        return newChatList;
+      });
+
+      setUniqueContacts((previous) => [
         {
-          type: "singleChat",
-          participantName: message.senderName,
-          participantEmail: message.senderEmail,
-          roomID: message.roomID,
+          name: message.senderName,
+          email: message.senderEmail,
         },
         ...previous,
-      ];
+      ]);
 
-      return newChatList;
-    });
+      setCurrentChatWindow((currentSelectedChat) => {
+        if (currentSelectedChat === message.roomID) {
+          displayMessages(
+            [
+              {
+                senderName: message.senderName,
+                senderEmail: message.senderEmail,
+                content: message.messageContent,
+              },
+            ],
+            message.roomID
+          );
+        } else {
+          previous.get(message.roomID).push({
+            senderName: message.senderName,
+            senderEmail: message.senderEmail,
+            content: message.messageContent,
+          });
+        }
 
-    setUniqueContacts((previous) => [
-      {
-        name: message.senderName,
-        email: message.senderEmail,
-      },
-      ...previous,
-    ]);
+        return currentSelectedChat;
+      });
 
-    setCurrentChatWindow((currentSelectedChat) => {
-      if (currentSelectedChat === message.roomID) {
-        displayMessages(
-          [
-            {
-              senderName: message.senderName,
-              senderEmail: message.senderEmail,
-              content: message.messageContent,
-            },
-          ],
-          message.roomID
-        );
-      } else {
-        chatRoomIDToUnreadMessagesMap.get(message.roomID).push({
-          senderName: message.senderName,
-          senderEmail: message.senderEmail,
-          content: message.messageContent,
-        });
-      }
-
-      return currentSelectedChat;
+      return new Map(previous);
     });
   });
 
@@ -472,9 +475,7 @@ function ChatPage() {
     );
 
     if (singleChatMessage.length > 0) {
-      fetch(
-        `https://chat-spider.onrender.com/check-user-online/${chatRoomID}/${currentUser.email}`
-      )
+      fetch(`${apiURL}check-user-online/${chatRoomID}/${currentUser.email}`)
         .then((res) => res.json())
         .then((data) => {
           setUserIsOnline(data.online);
@@ -489,7 +490,7 @@ function ChatPage() {
     //the current chat were also sent to the database.
     //so they are also included in the last 20 chats.
     if (displayedMessageCountMap.get(chatRoomID) === 0) {
-      fetch(`https://chat-spider.onrender.com/get-messages/${chatRoomID}/0`)
+      fetch(`${apiURL}get-messages/${chatRoomID}/0`)
         .then((res) => res.json())
         .then((data) => {
           //render these messages
@@ -589,7 +590,7 @@ function ChatPage() {
     }
 
     let roomID = uuid4();
-    fetch("https://chat-spider.onrender.com/create-new-group", {
+    fetch(`${apiURL}create-new-group`, {
       method: "Post",
       headers: {
         "Content-type": "application/json",
@@ -669,7 +670,7 @@ function ChatPage() {
       //new chat
       let roomID = `single-${uuid4()}`;
 
-      fetch("https://chat-spider.onrender.com/create-new-chat", {
+      fetch(`${apiURL}create-new-chat`, {
         method: "POST",
         body: JSON.stringify({
           senderName: currentUser.name,
@@ -693,9 +694,7 @@ function ChatPage() {
             return;
           }
 
-          fetch(
-            `https://chat-spider.onrender.com/check-user-online/${roomID}/${currentUser.email}`
-          )
+          fetch(`${apiURL}check-user-online/${roomID}/${currentUser.email}`)
             .then((res) => res.json())
             .then((data) => {
               setUserIsOnline(data.online);
@@ -780,7 +779,7 @@ function ChatPage() {
       return;
     }
 
-    fetch("https://chat-spider.onrender.com/join-new-group", {
+    fetch(`${apiURL}join-new-group`, {
       method: "post",
       headers: {
         "Content-type": "application/json",
@@ -813,7 +812,7 @@ function ChatPage() {
 
         //get the latest message of the group
         fetch(
-          `https://chat-spider.onrender.com/chat-preview-message/${groupRoomIDToJoin.current.value}`
+          `${apiURL}chat-preview-message/${groupRoomIDToJoin.current.value}`
         )
           .then((res) => res.json())
           .then((data) => {
@@ -864,7 +863,7 @@ function ChatPage() {
       if (!loadingMessages && !fetchedAllMessagesMap.get(roomID)) {
         setLoadingMessages(true);
         fetch(
-          `https://chat-spider.onrender.com/get-messages/${roomID}/${displayedMessageCountMap.get(
+          `${apiURL}get-messages/${roomID}/${displayedMessageCountMap.get(
             roomID
           )}`
         )
@@ -919,12 +918,18 @@ function ChatPage() {
   }
 
   function showGroupMembers() {
-    fetch(
-      `https://chat-spider.onrender.com/group-members-list/${currentChatWindow}`
-    )
+    fetch(`${apiURL}group-members-list/${currentChatWindow}`)
       .then((res) => res.json())
       .then((data) => {
         setCurrentChatGroupMembers(data);
+        if (window.innerWidth <= 683) {
+          document
+            .querySelector(".chatPage__rightSection")
+            .classList.add("hide");
+          document
+            .querySelector(".chatPage__leftSection")
+            .classList.remove("hide");
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -933,9 +938,7 @@ function ChatPage() {
   }
 
   function copyUserEmail() {
-    fetch(
-      `https://chat-spider.onrender.com/get-user-email/${currentChatWindow}`
-    )
+    fetch(`${apiURL}get-user-email/${currentChatWindow}`)
       .then((res) => res.json())
       .then((doc) => {
         navigator.clipboard.writeText(
@@ -996,7 +999,7 @@ function ChatPage() {
                 roomID={userChat.roomID}
                 handleOnClickFunction={handleChatPreviewClick}
                 unReadCount={
-                  chatRoomIDToUnreadMessagesMap.get(userChat.roomID).length
+                  chatRoomIDToUnreadMessagesMap.get(userChat.roomID)?.length
                 }
               />
             ) : (
@@ -1007,7 +1010,9 @@ function ChatPage() {
                 roomID={userChat.roomID}
                 handleOnClickFunction={handleChatPreviewClick}
                 unReadCount={
-                  chatRoomIDToUnreadMessagesMap.get(userChat.roomID).length
+                  chatRoomIDToUnreadMessagesMap.get(userChat.roomID)
+                    ? chatRoomIDToUnreadMessagesMap.get(userChat.roomID)?.length
+                    : 0
                 }
               />
             )
