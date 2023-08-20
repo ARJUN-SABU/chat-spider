@@ -18,7 +18,7 @@ function ChatPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const socket = io("http://localhost:8000/");
+  const socket = io("https://chat-spider.onrender.com/");
 
   //states
   const [userChatList, setUserChatList] = useState([]);
@@ -58,7 +58,7 @@ function ChatPage() {
       navigate("/");
     } else {
       fetch(
-        `http://localhost:8000/user-chats-and-groups/${location.state.userID}`
+        `https://chat-spider.onrender.com/user-chats-and-groups/${location.state.userID}`
       )
         .then((data) => data.json())
         .then((userDoc) => {
@@ -80,7 +80,7 @@ function ChatPage() {
 
           userDoc.userChats.forEach((userChat) => {
             fetch(
-              `http://localhost:8000/chat-preview-message/${userChat.roomID}`
+              `https://chat-spider.onrender.com/chat-preview-message/${userChat.roomID}`
             )
               .then((res) => res.json())
               .then((data) => {
@@ -473,7 +473,7 @@ function ChatPage() {
 
     if (singleChatMessage.length > 0) {
       fetch(
-        `http://localhost:8000/check-user-online/${chatRoomID}/${currentUser.email}`
+        `https://chat-spider.onrender.com/check-user-online/${chatRoomID}/${currentUser.email}`
       )
         .then((res) => res.json())
         .then((data) => {
@@ -489,7 +489,7 @@ function ChatPage() {
     //the current chat were also sent to the database.
     //so they are also included in the last 20 chats.
     if (displayedMessageCountMap.get(chatRoomID) === 0) {
-      fetch(`http://localhost:8000/get-messages/${chatRoomID}/0`)
+      fetch(`https://chat-spider.onrender.com/get-messages/${chatRoomID}/0`)
         .then((res) => res.json())
         .then((data) => {
           //render these messages
@@ -589,7 +589,7 @@ function ChatPage() {
     }
 
     let roomID = uuid4();
-    fetch("http://localhost:8000/create-new-group", {
+    fetch("https://chat-spider.onrender.com/create-new-group", {
       method: "Post",
       headers: {
         "Content-type": "application/json",
@@ -669,7 +669,7 @@ function ChatPage() {
       //new chat
       let roomID = `single-${uuid4()}`;
 
-      fetch("http://localhost:8000/create-new-chat", {
+      fetch("https://chat-spider.onrender.com/create-new-chat", {
         method: "POST",
         body: JSON.stringify({
           senderName: currentUser.name,
@@ -694,7 +694,7 @@ function ChatPage() {
           }
 
           fetch(
-            `http://localhost:8000/check-user-online/${roomID}/${currentUser.email}`
+            `https://chat-spider.onrender.com/check-user-online/${roomID}/${currentUser.email}`
           )
             .then((res) => res.json())
             .then((data) => {
@@ -780,7 +780,7 @@ function ChatPage() {
       return;
     }
 
-    fetch("http://localhost:8000/join-new-group", {
+    fetch("https://chat-spider.onrender.com/join-new-group", {
       method: "post",
       headers: {
         "Content-type": "application/json",
@@ -813,7 +813,7 @@ function ChatPage() {
 
         //get the latest message of the group
         fetch(
-          `http://localhost:8000/chat-preview-message/${groupRoomIDToJoin.current.value}`
+          `https://chat-spider.onrender.com/chat-preview-message/${groupRoomIDToJoin.current.value}`
         )
           .then((res) => res.json())
           .then((data) => {
@@ -864,7 +864,7 @@ function ChatPage() {
       if (!loadingMessages && !fetchedAllMessagesMap.get(roomID)) {
         setLoadingMessages(true);
         fetch(
-          `http://localhost:8000/get-messages/${roomID}/${displayedMessageCountMap.get(
+          `https://chat-spider.onrender.com/get-messages/${roomID}/${displayedMessageCountMap.get(
             roomID
           )}`
         )
@@ -919,7 +919,9 @@ function ChatPage() {
   }
 
   function showGroupMembers() {
-    fetch(`http://localhost:8000/group-members-list/${currentChatWindow}`)
+    fetch(
+      `https://chat-spider.onrender.com/group-members-list/${currentChatWindow}`
+    )
       .then((res) => res.json())
       .then((data) => {
         setCurrentChatGroupMembers(data);
@@ -931,7 +933,9 @@ function ChatPage() {
   }
 
   function copyUserEmail() {
-    fetch(`http://localhost:8000/get-user-email/${currentChatWindow}`)
+    fetch(
+      `https://chat-spider.onrender.com/get-user-email/${currentChatWindow}`
+    )
       .then((res) => res.json())
       .then((doc) => {
         navigator.clipboard.writeText(

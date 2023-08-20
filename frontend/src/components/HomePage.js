@@ -24,7 +24,7 @@ function HomePage() {
 
     //check if the user doesn't exist
     fetch(
-      `http://localhost:8000/check-user-exists/${document
+      `https://chat-spider.onrender.com/check-user-exists/${document
         .querySelector("#loginUserEmail")
         .value.toLowerCase()}`
     )
@@ -60,7 +60,7 @@ function HomePage() {
       return;
     }
 
-    fetch("http://localhost:8000/create-new-user", {
+    fetch("https://chat-spider.onrender.com/create-new-user", {
       method: "post",
       body: JSON.stringify({
         userName: document.querySelector("#newUserName").value,
