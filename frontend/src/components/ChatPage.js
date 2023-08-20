@@ -18,7 +18,7 @@ function ChatPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const socket = io("https://chat-spider-backend.vercel.app/");
+  const socket = io("https://chat-spider.onrender.com/");
 
   //states
   const [userChatList, setUserChatList] = useState([]);
@@ -58,7 +58,7 @@ function ChatPage() {
       navigate("/");
     } else {
       fetch(
-        `https://chat-spider-backend.vercel.app/user-chats-and-groups/${location.state.userID}`
+        `https://chat-spider.onrender.com/user-chats-and-groups/${location.state.userID}`
       )
         .then((data) => data.json())
         .then((userDoc) => {
@@ -80,7 +80,7 @@ function ChatPage() {
 
           userDoc.userChats.forEach((userChat) => {
             fetch(
-              `https://chat-spider-backend.vercel.app/chat-preview-message/${userChat.roomID}`
+              `https://chat-spider.onrender.com/chat-preview-message/${userChat.roomID}`
             )
               .then((res) => res.json())
               .then((data) => {
@@ -473,7 +473,7 @@ function ChatPage() {
 
     if (singleChatMessage.length > 0) {
       fetch(
-        `https://chat-spider-backend.vercel.app/check-user-online/${chatRoomID}/${currentUser.email}`
+        `https://chat-spider.onrender.com/check-user-online/${chatRoomID}/${currentUser.email}`
       )
         .then((res) => res.json())
         .then((data) => {
@@ -489,9 +489,7 @@ function ChatPage() {
     //the current chat were also sent to the database.
     //so they are also included in the last 20 chats.
     if (displayedMessageCountMap.get(chatRoomID) === 0) {
-      fetch(
-        `https://chat-spider-backend.vercel.app/get-messages/${chatRoomID}/0`
-      )
+      fetch(`https://chat-spider.onrender.com/get-messages/${chatRoomID}/0`)
         .then((res) => res.json())
         .then((data) => {
           //render these messages
@@ -591,7 +589,7 @@ function ChatPage() {
     }
 
     let roomID = uuid4();
-    fetch("https://chat-spider-backend.vercel.app/create-new-group", {
+    fetch("https://chat-spider.onrender.com/create-new-group", {
       method: "Post",
       headers: {
         "Content-type": "application/json",
@@ -671,7 +669,7 @@ function ChatPage() {
       //new chat
       let roomID = `single-${uuid4()}`;
 
-      fetch("https://chat-spider-backend.vercel.app/create-new-chat", {
+      fetch("https://chat-spider.onrender.com/create-new-chat", {
         method: "POST",
         body: JSON.stringify({
           senderName: currentUser.name,
@@ -696,7 +694,7 @@ function ChatPage() {
           }
 
           fetch(
-            `https://chat-spider-backend.vercel.app/check-user-online/${roomID}/${currentUser.email}`
+            `https://chat-spider.onrender.com/check-user-online/${roomID}/${currentUser.email}`
           )
             .then((res) => res.json())
             .then((data) => {
@@ -782,7 +780,7 @@ function ChatPage() {
       return;
     }
 
-    fetch("https://chat-spider-backend.vercel.app/join-new-group", {
+    fetch("https://chat-spider.onrender.com/join-new-group", {
       method: "post",
       headers: {
         "Content-type": "application/json",
@@ -815,7 +813,7 @@ function ChatPage() {
 
         //get the latest message of the group
         fetch(
-          `https://chat-spider-backend.vercel.app/chat-preview-message/${groupRoomIDToJoin.current.value}`
+          `https://chat-spider.onrender.com/chat-preview-message/${groupRoomIDToJoin.current.value}`
         )
           .then((res) => res.json())
           .then((data) => {
@@ -866,7 +864,7 @@ function ChatPage() {
       if (!loadingMessages && !fetchedAllMessagesMap.get(roomID)) {
         setLoadingMessages(true);
         fetch(
-          `https://chat-spider-backend.vercel.app/get-messages/${roomID}/${displayedMessageCountMap.get(
+          `https://chat-spider.onrender.com/get-messages/${roomID}/${displayedMessageCountMap.get(
             roomID
           )}`
         )
@@ -922,7 +920,7 @@ function ChatPage() {
 
   function showGroupMembers() {
     fetch(
-      `https://chat-spider-backend.vercel.app/group-members-list/${currentChatWindow}`
+      `https://chat-spider.onrender.com/group-members-list/${currentChatWindow}`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -936,7 +934,7 @@ function ChatPage() {
 
   function copyUserEmail() {
     fetch(
-      `https://chat-spider-backend.vercel.app/get-user-email/${currentChatWindow}`
+      `https://chat-spider.onrender.com/get-user-email/${currentChatWindow}`
     )
       .then((res) => res.json())
       .then((doc) => {
