@@ -10,6 +10,8 @@ import "../styles/HomePage.css";
 
 function HomePage() {
   const navigate = useNavigate();
+  // const apiURL = "http://localhost:8000/";
+  const apiURL = "https://chat-spider.onrender.com/";
 
   const [loginError, setLoginError] = useState("");
   const [signUpError, setSignUpError] = useState("");
@@ -24,7 +26,7 @@ function HomePage() {
 
     //check if the user doesn't exist
     fetch(
-      `https://chat-spider.onrender.com/check-user-exists/${document
+      `${apiURL}check-user-exists/${document
         .querySelector("#loginUserEmail")
         .value.toLowerCase()}`
     )
@@ -60,7 +62,7 @@ function HomePage() {
       return;
     }
 
-    fetch("https://chat-spider.onrender.com/create-new-user", {
+    fetch(`${apiURL}create-new-user`, {
       method: "post",
       body: JSON.stringify({
         userName: document.querySelector("#newUserName").value,
