@@ -3,9 +3,7 @@ require("dotenv").config();
 
 let dbConnection;
 
-// let uri = process.env.MONGODB_URI;
-let uri =
-  "mongodb+srv://arjunsabu99:arjun-chat-spider-99@cluster0.zbepgqh.mongodb.net/chat-spider-database?retryWrites=true&w=majority";
+let uri = process.env.MONGODB_URI;
 
 module.exports = {
   connectToDb: (cb) => {
