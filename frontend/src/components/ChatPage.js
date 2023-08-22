@@ -1,3 +1,30 @@
+/*
+  This is the page where the user enters after successful login
+  and the following features are provided:
+  1. A Panel which offers the following:
+    1.1. User's recent chats by listing chat tabs with each individual  
+         tab showing recipient name or group name, message preview of 
+         the latest message, number of currently unread messages when a 
+         chat is not opened.
+    1.2. More Options like:
+         1.2.1. Start a new conversation with a new user.
+         1.2.2. Join a new group.
+         1.2.3. Create a new group.
+  .
+  2. A chat window which provides the following features:
+    2.1. Showing whether reciepient is online/offline/typing on real-time basis.
+    2.2. An input and button to type and send messages.
+    2.3. Displays the messages of the chat, i.e, the conversation
+         that has taken place so far. Each individual message
+         also shows the time when it was created and sent. When a chat is opened, 
+         all of its messages are not loaded at once. The first 20 messages are loaded. 
+         And as the user scrolls up, the next 20 messages are loaded 
+         which provides efficiency.   
+
+  3. Both Private Chats and Group Chats are supported and handled
+     using socket.io connection.
+*/
+
 //packages
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -57,8 +84,13 @@ function ChatPage() {
 
   useEffect(() => {
     if (!location.state) {
+      //if someone opens /chats url directly
+      //without going through the home page and
+      //sign-in featue, then the user is redirected
+      //back to the homepage.
       navigate("/");
     } else {
+      //get the list of user's private and group chats.
       fetch(`${apiURL}user-chats-and-groups/${location.state.userID}`)
         .then((data) => data.json())
         .then((userDoc) => {
@@ -1253,7 +1285,6 @@ function ChatPage() {
           ))}
         </div>
         <div className="chatPage__rightSection__bottom hide">
-          {/* <div>Adding smiley selector later</div> */}
           <textarea
             className="chatPage__rightSection__bottom__inputArea"
             onChange={(event) => autoGrowInputArea(event, "oldChatInput")}

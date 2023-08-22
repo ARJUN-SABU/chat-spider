@@ -1,3 +1,10 @@
+/*
+  This component is used to render the individual chat selection
+  tabs. When clicked, it opens the individual chat window.
+  Each chat selection tab has recipient_name / group_name, message_preview,
+  the number of messages currently unread by the user. 
+*/
+
 //styles
 import "../styles/ChatPreview.css";
 
