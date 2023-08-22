@@ -53,4 +53,5 @@ Backend is deployed at [Render](https://render.com/ "Render").
   ![Creating a New Group](snaps/8.png)
 
 - Chat Selection in Mobile View:
-  <img src="snaps/9.png" alt="Chat Selection in Mobile View" width="200" />
+  <br/>
+  <img src="snaps/9.png" alt="Chat Selection in Mobile View" width="270" />
