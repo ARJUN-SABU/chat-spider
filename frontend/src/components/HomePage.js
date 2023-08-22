@@ -17,8 +17,8 @@ import "../styles/HomePage.css";
 
 function HomePage() {
   const navigate = useNavigate();
-  const apiURL = "http://localhost:8000/";
-  // const apiURL = "https://chat-spider.onrender.com/";
+  // const apiURL = "http://localhost:8000/";
+  const apiURL = "https://chat-spider.onrender.com/";
 
   const [loginError, setLoginError] = useState("");
   const [signUpError, setSignUpError] = useState("");

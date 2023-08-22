@@ -44,8 +44,8 @@ import "../styles/ChatPage.css";
 function ChatPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const apiURL = "http://localhost:8000/";
-  // const apiURL = "https://chat-spider.onrender.com/";
+  // const apiURL = "http://localhost:8000/";
+  const apiURL = "https://chat-spider.onrender.com/";
 
   const socket = io(`${apiURL}`);
 
