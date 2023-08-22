@@ -17,8 +17,8 @@ import "../styles/ChatPage.css";
 function ChatPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  // const apiURL = "http://localhost:8000/";
-  const apiURL = "https://chat-spider.onrender.com/";
+  const apiURL = "http://localhost:8000/";
+  // const apiURL = "https://chat-spider.onrender.com/";
 
   const socket = io(`${apiURL}`);
 
@@ -233,13 +233,11 @@ function ChatPage() {
   });
 
   // socket.on("new-user-joined", (message) => {
-  //   console.log(message);
   //   setUserChatList((previous) => {
   //     let idx = previous.findIndex(
   //       (userChat) => userChat.roomID === message.roomID
   //     );
   //     let removedChat = previous.splice(idx, 1);
-  //     console.log(removedChat);
   //     return [removedChat[0], ...previous];
   //   });
 
@@ -1088,6 +1086,7 @@ function ChatPage() {
           <div>
             {uniqueContacts.map((contact, index) => (
               <div
+                key={`groupUser-${index}`}
                 className={`chatPage__leftSection__bottom__groupSelectionUser groupUser-${index}`}
                 onClick={() =>
                   toggleUserSelectionForGroup(`groupUser-${index}`)
@@ -1106,8 +1105,11 @@ function ChatPage() {
         </div>
 
         <div className="chatPage__leftSection__bottom chatPage__leftSection__bottom--showGroupMembersPanel hide">
-          {currentChatGroupMembers.map((groupMember) => (
-            <div className="chatPage__leftSection__bottom--showGroupMembersPanel__memberInfo">
+          {currentChatGroupMembers.map((groupMember, index) => (
+            <div
+              key={`groupMember-${index}`}
+              className="chatPage__leftSection__bottom--showGroupMembersPanel__memberInfo"
+            >
               <p className="chatPage__leftSection__bottom--showGroupMembersPanel__memberInfo__name">
                 {groupMember.name}
               </p>
