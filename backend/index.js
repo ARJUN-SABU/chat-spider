@@ -116,8 +116,6 @@ connectToDb((err) => {
       });
 
       socket.on("disconnect", () => {
-        // delete usersConnectedToServer[]
-
         let userEmail = usersSocketToEmailMap.get(socket);
         usersSocketToEmailMap.delete(socket);
         usersEmailToSocketMap.delete(userEmail);

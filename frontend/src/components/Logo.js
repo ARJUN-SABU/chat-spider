@@ -1,3 +1,7 @@
+/*
+  This component renders the Logo of the application.
+*/
+
 //styles
 import "../styles/Logo.css";
 

@@ -1,3 +1,10 @@
+/*
+  This is the Home Page of the application. It has the following features:
+  1. Logo of the application.
+  2. User sign-in (only using email-address).
+  3. User sign-up (only using name and email-address).
+*/
+
 //packages
 import { useState } from "react";
 import { useNavigate } from "react-router";
@@ -10,8 +17,8 @@ import "../styles/HomePage.css";
 
 function HomePage() {
   const navigate = useNavigate();
-  // const apiURL = "http://localhost:8000/";
-  const apiURL = "https://chat-spider.onrender.com/";
+  const apiURL = "http://localhost:8000/";
+  // const apiURL = "https://chat-spider.onrender.com/";
 
   const [loginError, setLoginError] = useState("");
   const [signUpError, setSignUpError] = useState("");
@@ -19,12 +26,12 @@ function HomePage() {
 
   function handleLogin() {
     if (document.querySelector("#loginUserEmail").value === "") {
-      //set the error message
       setLoginError("User email cannot be empty.");
       return;
     }
 
-    //check if the user doesn't exist
+    //Check if the user with the given email-address
+    //exists or not.
     fetch(
       `${apiURL}check-user-exists/${document
         .querySelector("#loginUserEmail")
